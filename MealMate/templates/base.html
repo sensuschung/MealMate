@@ -1,0 +1,319 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'js/jQuery/jquery-3.7.1.min.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/semantic.min.css' %}">
+    <title>Homepage - Fomantic</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/reset.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/site.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/container.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/grid.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/header.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/image.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/menu.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/input.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/divider.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/dropdown.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/segment.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/button.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/list.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/icon.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/sidebar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/transition.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/progress.css' %}">
+
+    <style type="text/css">
+        .hidden.menu {
+            display: none;
+        }
+
+        .masthead.segment {
+            min-height: 100px;
+            padding: 1em 0em;
+        }
+
+        .masthead .logo.item img {
+            margin-right: 1em;
+        }
+
+        .masthead .ui.menu .ui.button {
+            margin-left: 0.5em;
+        }
+
+        .masthead h1.ui.header {
+            margin-top: 3em;
+            margin-bottom: 0em;
+            font-size: 4em;
+            font-weight: normal;
+        }
+
+        .masthead h2 {
+            font-size: 1.7em;
+            font-weight: normal;
+        }
+
+        .ui.vertical.stripe {
+            padding: 8em 0em;
+        }
+
+        .ui.vertical.stripe h3 {
+            font-size: 2em;
+        }
+
+        .ui.vertical.stripe .button+h3,
+        .ui.vertical.stripe p+h3 {
+            margin-top: 3em;
+        }
+
+        .ui.vertical.stripe .floated.image {
+            clear: both;
+        }
+
+        .ui.vertical.stripe p {
+            font-size: 1.33em;
+        }
+
+        .ui.vertical.stripe .horizontal.divider {
+            margin: 3em 0em;
+        }
+
+        .quote.stripe.segment {
+            padding: 0em;
+        }
+
+        .quote.stripe.segment .grid .column {
+            padding-top: 5em;
+            padding-bottom: 5em;
+        }
+
+        .footer.segment {
+            padding: 5em 0em;
+        }
+
+        .secondary.pointing.menu .toc.item {
+            display: none;
+        }
+
+        @media only screen and (max-width: 700px) {
+            .ui.fixed.menu {
+                display: none !important;
+            }
+
+            .secondary.pointing.menu .item,
+            .secondary.pointing.menu .menu {
+                display: none;
+            }
+
+            .secondary.pointing.menu .toc.item {
+                display: block;
+            }
+
+            .masthead.segment {
+                min-height: 100px;
+            }
+
+            .masthead h1.ui.header {
+                font-size: 2em;
+                margin-top: 1.5em;
+            }
+
+            .masthead h2 {
+                margin-top: 0.5em;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+    <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+
+    <script src="{% static 'sementic/dist/components/visibility.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/sidebar.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/progress.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/transition.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/dropdown.js' %}"></script>
+    <script>
+        $(document)
+            .ready(function () {
+
+                // fix menu when passed
+                $('.masthead')
+                    .visibility({
+                        once: false,
+                        onBottomPassed: function () {
+                            $('.fixed.menu').transition('fade in');
+                        },
+                        onBottomPassedReverse: function () {
+                            $('.fixed.menu').transition('fade out');
+                        }
+                    })
+                    ;
+
+                // create sidebar and attach to menu open
+                $('.ui.sidebar')
+                    .sidebar('attach events', '.toc.item')
+                    ;
+                $('.ui.menu .ui.dropdown').dropdown({
+                        on: 'hover'
+                    });
+                $('.ui.menu a.item')
+                    .on('click', function() {
+                    $(this)
+                        .addClass('active')
+                        .siblings()
+                        .removeClass('active')
+                    ;
+                    })
+                ;
+
+            })
+            ;
+    </script>
+    <title>{% block title %}{% endblock %}</title>
+
+</head>
+
+<body>
+    <!-- Following Menu -->
+    <div class="ui large top fixed hidden inverted brown menu">
+        <div class="ui container">
+            <div class="header item">Brand</div>
+            <a class="item" href="{% url 'home' %}">Home</a>
+            <a class="item" href="{% url 'forum_home' %}">Forum</a>
+            <a class="item">Company</a>
+            <a class="item">Careers</a>
+            <div class="right menu">
+                <div class="item">
+                    <a class="ui inverted button">Log in</a>
+                </div>
+                <div class="item">
+                    <a class="ui inverted button">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="ui vertical inverted brown sidebar menu">
+        <div class="header item">Brand</div>
+        <a class="item" href="{% url 'home' %}">Home</a>
+        <a class="item" href="{% url 'forum_home' %}">Forum</a>
+        <a class="item">Company</a>
+        <a class="item">Careers</a>
+        <a class="item">Login</a>
+        <a class="item">Signup</a>
+    </div>
+
+
+    <!-- Page Contents -->
+    <div class="pusher">
+        <div class="ui inverted brown vertical masthead center aligned segment">
+
+            <div class="ui container">
+                <div class="ui large secondary inverted pointing menu">
+                    <div class="left item">
+                        <a class="toc item">
+                            <i class="sidebar icon"></i>
+                        </a>
+                        <div class="header item">Brand</div>
+                        <a class="item" href="{% url 'home' %}">Home</a>
+                        <a class="item" href="{% url 'forum_home' %}">Forum</a>
+                        <a class="item" href="#">Company</a>
+                        <a class="item" href="#">Careers</a>
+                    </div>
+                    <div class="right item">
+                        <!-- <div class="item">
+                            <div class="ui action left icon input">
+                              <i class="search icon"></i>
+                              <input type="text" placeholder="Search">
+                              <button class="ui button">Submit</button>
+                            </div>
+                          </div> -->
+                        <div class="ui dropdown item">
+                            Dropdown
+                            <div class="ui menu brown ">
+                              <div class="item">Action</div>
+                              <div class="item">Another Action</div>
+                              <div class="item">Something else here</div>
+                              <div class="divider"></div>
+                              <div class="item">Separated Link</div>
+                              <div class="divider"></div>
+                              <div class="item">One more separated link</div>
+                            </div>
+                        </div>
+                        <a class="ui inverted button">Log in</a>
+                        <a class="ui inverted button">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+
+            {% block masthead %}{% endblock masthead %}
+            <!-- <div class="ui text container">
+                <h1 class="ui inverted header">
+                    Imagine-a-Company
+                </h1>
+                <h2>Do whatever you want when you want to.</h2>
+                <div class="ui huge primary button">Get Started <i class="right arrow icon"></i></div>
+            </div> -->
+
+        </div>
+
+        {% block content %}{% endblock %}
+
+        <div class="ui inverted brown vertical footer segment">
+            <div class="ui center aligned container">
+                <div class="ui stackable inverted divided grid">
+                  <div class="three wide column">
+                    <h4 class="ui inverted header">Group 1</h4>
+                    <div class="ui inverted link list">
+                      <a href="#" class="item">Link One</a>
+                      <a href="#" class="item">Link Two</a>
+                      <a href="#" class="item">Link Three</a>
+                      <a href="#" class="item">Link Four</a>
+                    </div>
+                  </div>
+                  <div class="three wide column">
+                    <h4 class="ui inverted header">Group 2</h4>
+                    <div class="ui inverted link list">
+                      <a href="#" class="item">Link One</a>
+                      <a href="#" class="item">Link Two</a>
+                      <a href="#" class="item">Link Three</a>
+                      <a href="#" class="item">Link Four</a>
+                    </div>
+                  </div>
+                  <div class="three wide column">
+                    <h4 class="ui inverted header">Group 3</h4>
+                    <div class="ui inverted link list">
+                      <a href="#" class="item">Link One</a>
+                      <a href="#" class="item">Link Two</a>
+                      <a href="#" class="item">Link Three</a>
+                      <a href="#" class="item">Link Four</a>
+                    </div>
+                  </div>
+                  <div class="seven wide column">
+                    <h4 class="ui inverted header">Footer Header</h4>
+                    <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
+                  </div>
+                </div>
+                <div class="ui inverted section divider"></div>
+                <img src="assets/images/logo.png" class="ui centered mini image">
+                <div class="ui horizontal inverted small divided link list">
+                  <a class="item" href="#">Site Map</a>
+                  <a class="item" href="#">Contact Us</a>
+                  <a class="item" href="#">Terms and Conditions</a>
+                  <a class="item" href="#">Privacy Policy</a>
+                </div>
+              </div>
+        </div>
+    </div>
+
+    
+    {% block script %}{% endblock %}
+</body>
+
+</html>

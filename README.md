@@ -30,6 +30,10 @@ sudo mysql -u admin -p MealMate < mealmate_backup.sql
 4. Django数据库迁移
 `python manage.py migrate`
 
-5. 启动服务器查看效果
+5. 安装sementic-ui
+   `$ sudo npm install -g gulp@3.9.1`
+    > fomentic 官方文档：https://fomantic-ui.com/introduction/getting-started.html 
+
+6. 启动服务器查看效果
 `python manage.py runserver`
 > 数据库中已有超级用户admin（登录秘钥admin），可登录查看效果x
