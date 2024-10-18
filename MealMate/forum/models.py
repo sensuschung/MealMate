@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
+from django.utils import timezone
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=20)
@@ -32,10 +34,15 @@ class Post(models.Model):
     imaged = models.JSONField(null=True,blank=True)
     tag = models.ManyToManyField(Tag)
     click = models.IntegerField(default=0,db_index=True)
-    likes = models.IntegerField(default=0)
+    likes = models.IntegerField(default=0)  
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if 'update_fields' in kwargs and any(field in kwargs['update_fields'] for field in ['title', 'content','imaged']):
+            self.last_modified = timezone.now() 
+        super().save(*args, **kwargs)
 
 class GroupPost(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

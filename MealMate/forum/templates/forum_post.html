@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Forum_post{% endblock %}
+
+{% block masthead %}{% endblock %}
+
+{% block content %}
+{% load custom_filters %}
+{% load markdown_extras %}
+<div class="ui vertical stripe segment" style="padding-top:50px;padding-bottom:40px;">
+    <div class="ui middle stackable grid wide container">
+        <div class="four wide column">
+            <div class="ui left text vertical secondary main hidden_menu menu">
+                <div class="item">
+                    <div class="ui scrolling search">
+                        <div class="ui icon input">
+                            <input class="prompt" type="text" placeholder="Search posts...">
+                            <i class="search icon"></i>
+                        </div>
+                        <div class="results"></div>
+                    </div>
+                </div>
+                <div class="ui hidden divider"></div>
+                {% for forum in forums %}
+                <a class="item {% if forum.id == selected_forum_id %}active{% endif %}" href="{% url 'forum_post' forum.id %}">
+                    {% if forum.icon %}
+                    <img class="ui avatar image" src="{{ forum.icon.url }}" alt="{{ forum.name }}"
+                        style="margin-right: 12px;" />
+                    {% else %}
+                    {% endif %}
+                    <span>{{ forum.name }}</span>
+                    <a />
+                    {% endfor %}
+                    <div class="ui inverted fitted divider"></div>
+                    <a class="item">
+                        <i class="glass cheers large icon" style="margin-right: 12px;"></i>
+                        <span>
+                        食伴聚会
+                        </span>
+                    </a>
+            </div>
+        </div>
+        <div class="eight wide column">
+            {% if posts.paginator.count == 0 %}
+                <div class="ui center aligned brown message transition">
+                    <i class="close icon"></i>
+                    <div class="header">
+                        当前话题下没有帖子哦
+                    </div>
+                </div>
+            {% else %}
+            <div class="ui horizontal cards">
+                {% for post in posts %}
+                <a class="ui card" style="width:95%;height:auto" href="{% url 'post_detail' post.id %}">
+                    <div class="content">
+                        <div class="right floated meta">{{ post.last_modified|time_ago }}</div>
+                        <div class="header">{{ post.title }}</div>
+                        <div class="meta">{{ post.author }}</div>
+                        <div class="description">
+                            {% with post.content|markdown_to_plain as rendered_content %}
+                                {{ rendered_content|truncatechars:50|safe }}{% if rendered_content|length > 100 %}…{% endif %}
+                            {% endwith %}
+                        </div>
+
+                    </div>
+                    <div class="extra content">
+                        <span class="right floated like">
+                            <i class="like icon"></i>
+                            Like({{ post.likes }})
+                            &emsp;
+                            <i class="eye outline icon"></i>
+                            {{ post.click }}
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="ui section divider "></div>
+            <!-- <div class="ui basic segment"> -->
+                <div class="ui centered pagination menu">
+                    {% if posts.has_previous %}
+                    <a class="item" href="?page=1">First</a>
+                    <a class="item" href="?page={{ posts.previous_page_number }}">Previous</a>
+                    {% endif %}
+
+                    <!-- <span class="item">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span> -->
+
+                    {% for num in posts.paginator.page_range %}
+                        {% if posts.number == num %}
+                            <a class="item active" href="?page={{ num }}">{{ num }}</a>
+                        {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                            <a class="item" href="?page={{ num }}">{{ num }}</a>
+                        {% elif num == 1 or num == posts.paginator.num_pages %}
+                            <a class="item" href="?page={{ num }}">{{ num }}</a>
+                        {% elif num == posts.number|add:'-4' or num == posts.number|add:'4' %}
+                            <span class="item">...</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if posts.has_next %}
+                    <a class="item" href="?page={{ posts.next_page_number }}">Next</a>
+                    <a class="item" href="?page={{ posts.paginator.num_pages }}">Last</a>
+                    {% endif %}
+                </div>
+            <!-- </div> -->
+        </div>
+        <div class="four wide column">
+            <div class="ui basic center aligned stackable segment">
+                <div class="ui content">
+                <button class="ui labeled icon basic brown button" style="width: 100% ;">
+                    <i class="plus icon"></i>
+                    ADD NEW POST
+                </button>
+                </div>
+            </div>
+            <div class="ui calendar" id="inline_calendar">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $('.message .close')
+  .on('click', function() {
+    $(this)
+      .closest('.message')
+      .transition('fade')
+    ;
+  })
+;
+document.querySelectorAll('.item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        document.querySelectorAll('.item').forEach(function(i) {
+            i.classList.remove('active');
+        });
+        this.classList.add('active');
+    });
+});
+$(document)
+    .ready(function() {
+        $('.main.menu').visibility({
+            type: 'fixed',
+            
+        });
+        $(window).scroll(function() {
+                if ($(this).scrollTop() > 130) {
+                    $('.main.menu').css('margin-top', '80px');
+                } else {
+                    $('.main.menu').css('margin-top', '0px');
+                }
+            });
+        $('#inline_calendar')
+             .calendar()
+        ;
+
+})
+;
+
+const apiUrl = "{% url 'search-post' %}?q={query}";
+
+$(document).ready(function() {
+$('.ui.search')
+  .search({
+    preserveHTML : false,
+    type: 'category',
+    minCharacters : 1,
+    showNoResults:true,
+    apiSettings:{
+        url:apiUrl,
+        onResponse: function(apiResponse) {
+            var response = {
+                results: {}
+            };
+            
+            var groupCategory = '食伴聚会';
+            
+            $.each(apiResponse.group_posts, function(index, item) {
+                if (response.results[groupCategory] === undefined){
+                    response.results[groupCategory] = {
+                        name: groupCategory,
+                        results: []
+                    };
+                }
+                response.results[groupCategory].results.push({
+                    title: item.title,
+                    description: item.sponser_name,
+                    url: "/forum/post/"+item.id,
+                });
+            });
+
+            $.each(apiResponse.posts, function(index, item) {
+                var forumName = item.forum_name;
+                
+                if (response.results[forumName] === undefined) {
+                    response.results[forumName] = {
+                        name: forumName,
+                        results: []
+                    };
+                }
+                
+                response.results[forumName].results.push({
+                    title: item.title,
+                    description: item.author_name,
+                    url: "/forum/post/"+item.id,
+                });
+            });
+            return response;
+        }
+
+    },
+  })
+;
+})
+;
+</script>
+{% endblock %}

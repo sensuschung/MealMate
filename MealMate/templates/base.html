@@ -26,12 +26,18 @@
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/list.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/icon.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/sidebar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/search.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/transition.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/progress.css' %}">
 
     <style type="text/css">
         .hidden.menu {
             display: none;
+        }
+
+        .main.hidden.menu {
+            display: block;
+            visibility: visible;
         }
 
         .masthead.segment {
@@ -100,11 +106,23 @@
         .secondary.pointing.menu .toc.item {
             display: none;
         }
+        .main.menu {
+            transition: margin-top 0.3s ease;
+        }
+        .overlay .menu {
+            transition: left 0.1s ease;
+        }
 
+        @media only screen and (max-width: 1023px){
+            .hidden_menu{
+                display: none !important; /* 改成折叠？or icons */
+            }
+        }
         @media only screen and (max-width: 700px) {
             .ui.fixed.menu {
                 display: none !important;
             }
+
 
             .secondary.pointing.menu .item,
             .secondary.pointing.menu .menu {
@@ -131,10 +149,12 @@
         }
     </style>
     <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+    <script src="{% static 'sementic/dist/semantic.js' %}"></script>
 
     <script src="{% static 'sementic/dist/components/visibility.js' %}"></script>
     <script src="{% static 'sementic/dist/components/sidebar.js' %}"></script>
     <script src="{% static 'sementic/dist/components/progress.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/search.js' %}"></script>
     <script src="{% static 'sementic/dist/components/transition.js' %}"></script>
     <script src="{% static 'sementic/dist/components/dropdown.js' %}"></script>
     <script>

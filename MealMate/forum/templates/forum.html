@@ -52,12 +52,12 @@
                     {% for post in posts %}
                     <div class="item">
                         <div class="middle aligned content">
-                            <a class="header" style="font-weight:400">
+                            <a class="header" style="font-weight:400" href="{% url 'post_detail' post.id %}">
                                 <i class="circle icon" style="visibility: visible; color:#b62f2f"></i>
                                 {{post.title}}
                             </a>
                             <div class="ui right floated" style="color:#b62f2f;">
-                                <i class="burn icon" style="visibility: visible;color:#b62f2f"></i>
+                                <i class="fire alternate icon" style="visibility: visible;color:#b62f2f"></i>
                                 {{post.click}}
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                     {% endfor %}
                     <div class="item">
                         <div class="middle aligned content">
-                            <a class="ui right floated " style="color:#b62f2f;">MORE POSTS</div>
+                            <a class="ui right floated " style="color:#b62f2f;" href="/forum/1/">MORE POSTS</div>
                         </div>
                     </div>
                 </div>
