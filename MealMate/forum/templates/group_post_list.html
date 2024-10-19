@@ -22,7 +22,7 @@
                 </div>
                 <div class="ui hidden divider"></div>
                 {% for forum in forums %}
-                <a class="item {% if forum.id == selected_forum_id %}active{% endif %}" href="{% url 'forum_post' forum.id %}">
+                <a class="item " href="{% url 'forum_post' forum.id %}">
                     {% if forum.icon %}
                     <img class="ui avatar image" src="{{ forum.icon.url }}" alt="{{ forum.name }}"
                         style="margin-right: 12px;" />
@@ -32,7 +32,7 @@
                     <a />
                     {% endfor %}
                     <div class="ui inverted fitted divider"></div>
-                    <a class="item" href="{% url 'group_post_list' %}">
+                    <a class="item active" href="{% url 'group_post_list' %}">
                         <i class="glass cheers large icon" style="margin-right: 12px;"></i>
                         <span>
                         食伴聚会
@@ -49,44 +49,24 @@
                     </div>
                 {% endfor %}
             {% endif %}
-            {% if posts.paginator.count == 0 %}
+            {% if group_posts.paginator.count == 0 %}
                 <div class="ui center aligned brown message transition">
                     <i class="close icon"></i>
                     <div class="header">
-                        当前话题下没有帖子哦
+                        当前没有拼团帖哦
                     </div>
                 </div>
             {% else %}
             <div class="ui cards">
-                {% for post in posts %}
-                <a class="ui card" style="width:95%;height:auto" href="{% url 'post_detail' post.id %}">
+                {% for group_post in group_posts %}
+                <a class="ui card" style="width:95%;height:auto" href="">
                     <div class="content">
-                        <div class="right floated meta">{{ post.last_modified|time_ago }}</div>
-                        <div class="header">{{ post.title }}</div>
-                        <div class="meta">{{ post.author }}</div>
-                        <div class=" description">
-                            {% if post.images.all %}
-                                <img src="{{ post.images.first.image.url }}" class="ui tiny right floated image" style="filter: invert(0)object-fit: cover;" alt="Post image">    
-                            {% endif %}
-                            <div>
-                                {% with post.content|markdown_to_plain as rendered_content %}
-                                    {{ rendered_content|truncatechars:50|safe }}{% if rendered_content|length > 600 %}…{% endif %}
-                                {% endwith %}
-                            </div>
-                        </div>
-
+                        <div class="right floated meta">{{ group_post.create_at|time_ago }}</div>
+                        <div class="header">{{ group_post.title }}</div>
+                        <div class="meta">{{ group_post.sponser.username }}</div>
                     </div>
                     <div class="extra content">
-                        {% for tag in post.tag.all %}
-                            <div class="ui label">{{ tag.name }}</div>
-                        {% endfor %}
-                        <span class="right floated like">
-                            <i class="like icon"></i>
-                            Like({{ post.likes }})
-                            &emsp;
-                            <i class="eye outline icon"></i>
-                            {{ post.click }}
-                        </span>
+                        <!-- extra content -->
                     </div>
                 </a>
                 {% endfor %}
@@ -95,28 +75,28 @@
             <div class="ui section divider "></div>
             <!-- <div class="ui basic segment"> -->
                 <div class="ui centered pagination menu">
-                    {% if posts.has_previous %}
+                    {% if group_posts.has_previous %}
                     <a class="item" href="?page=1">First</a>
-                    <a class="item" href="?page={{ posts.previous_page_number }}">Previous</a>
+                    <a class="item" href="?page={{ group_posts.previous_page_number }}">Previous</a>
                     {% endif %}
 
                     <!-- <span class="item">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span> -->
 
-                    {% for num in posts.paginator.page_range %}
+                    {% for num in group_posts.paginator.page_range %}
                         {% if posts.number == num %}
                             <a class="item active" href="?page={{ num }}">{{ num }}</a>
-                        {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                        {% elif num > group_posts.number|add:'-3' and num < group_posts.number|add:'3' %}
                             <a class="item" href="?page={{ num }}">{{ num }}</a>
-                        {% elif num == 1 or num == posts.paginator.num_pages %}
+                        {% elif num == 1 or num == group_posts.paginator.num_pages %}
                             <a class="item" href="?page={{ num }}">{{ num }}</a>
-                        {% elif num == posts.number|add:'-4' or num == posts.number|add:'4' %}
+                        {% elif num == group_posts.number|add:'-4' or num == group_posts.number|add:'4' %}
                             <span class="item">...</span>
                         {% endif %}
                     {% endfor %}
 
-                    {% if posts.has_next %}
-                    <a class="item" href="?page={{ posts.next_page_number }}">Next</a>
-                    <a class="item" href="?page={{ posts.paginator.num_pages }}">Last</a>
+                    {% if group_posts.has_next %}
+                    <a class="item" href="?page={{ group_posts.next_page_number }}">Next</a>
+                    <a class="item" href="?page={{ group_posts.paginator.num_pages }}">Last</a>
                     {% endif %}
                 </div>
             <!-- </div> -->

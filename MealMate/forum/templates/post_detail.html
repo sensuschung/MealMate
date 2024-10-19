@@ -63,7 +63,25 @@
                 {{ rendered_content|safe }}
                 {% endwith %}
             </div>
-            <div class="ui section divider"></div>
+            <div class="ui hidden divider"></div>
+            {% if post.images.all %}
+                <div class="ui vertical items">
+                    {% for image in post.images.all %}
+                        <div class="ui image image-container">
+                            <a href="{{ image.image.url }}" data-lightbox="post-images">
+                                <img src="{{ image.image.url }}" style="filter: invert(0);height: 100%;width: auto;object-fit: cover;" alt="Post image">    
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="ui hidden divider"></div>
+            <div class="ui extra content">
+                {% for tag in post.tag.all %}
+                    <div class="ui label">{{ tag.name }}</div>
+                {% endfor %}
+            </div>
+            <div class="ui divider"></div>
             <div class="ui list">
                 <div class="ui item ">
                     <div class="ui content">
@@ -185,5 +203,10 @@
                 ;
         })
         ;
+        lightbox.option({
+            'fadeDuration': 200,     
+            'resizeDuration': 200,  
+            'wrapAround': true,       
+        });
 </script>
 {% endblock %}

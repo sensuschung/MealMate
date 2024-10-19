@@ -31,7 +31,7 @@ class Post(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     # restaurant = models.ForeignKey(to_be_determined,on_delete=models.SET_NULL,null=True)
     content = models.TextField()
-    imaged = models.JSONField(null=True,blank=True)
+    images = models.ManyToManyField('PostImage', related_name='post_images', blank=True,null=True)
     tag = models.ManyToManyField(Tag)
     click = models.IntegerField(default=0,db_index=True)
     likes = models.IntegerField(default=0)  
@@ -70,3 +70,6 @@ class JoinRequest(models.Model):
     def __str__(self):
         return str(self.id)
 
+class PostImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    image = models.FileField(upload_to='illustrations/')

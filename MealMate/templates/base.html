@@ -7,10 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="{% static 'js/jQuery/jquery-3.7.1.min.js' %}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'js/easymde/easymde.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'js/lightbox/lightbox.min.css' %}">
+
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/semantic.min.css' %}">
     <title>Homepage - Fomantic</title>
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/reset.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/site.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/checkbox.css' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/container.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/grid.css' %}">
@@ -112,6 +117,12 @@
         .overlay .menu {
             transition: left 0.1s ease;
         }
+        .image-container {
+            width: auto;  
+            height: 200px; 
+            overflow: hidden;
+            position: relative;
+        }
 
         @media only screen and (max-width: 1023px){
             .hidden_menu{
@@ -149,14 +160,19 @@
         }
     </style>
     <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+    <script src="{% static 'js/easymde/easymde.js' %}"></script>
     <script src="{% static 'sementic/dist/semantic.js' %}"></script>
+    <script src="{% static 'js/lightbox/lightbox.min.js' %}"></script>
 
     <script src="{% static 'sementic/dist/components/visibility.js' %}"></script>
     <script src="{% static 'sementic/dist/components/sidebar.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/checkbox.js' %}"></script>
     <script src="{% static 'sementic/dist/components/progress.js' %}"></script>
     <script src="{% static 'sementic/dist/components/search.js' %}"></script>
     <script src="{% static 'sementic/dist/components/transition.js' %}"></script>
     <script src="{% static 'sementic/dist/components/dropdown.js' %}"></script>
+
+
     <script>
         $(document)
             .ready(function () {
