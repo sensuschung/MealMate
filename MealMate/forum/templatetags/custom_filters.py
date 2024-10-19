@@ -1,5 +1,6 @@
 from django import template
 from django.utils.timesince import timesince
+import random
 
 register = template.Library()
 
@@ -17,3 +18,10 @@ def time_ago(value):
             number = time_difference.split()[0]
             return f"{number}{short_unit} ago"
     return "just now"
+
+@register.filter
+def random_avatar(_):
+    """随机选择一个默认头像文件名"""
+    avatars_cat = [f'cat{i}.png' for i in range(1, 15)]
+    avatars = avatars_cat
+    return random.choice(avatars)

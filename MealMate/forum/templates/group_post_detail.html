@@ -44,7 +44,7 @@
         <div class="ui segment"
             style="margin-bottom:40px;padding-top:60px;padding-bottom:60px;padding-left: 50px;padding-right: 50px;">
             <div class="ui main text container">
-                <h1 class="ui center aligned header">{{ post.title }}</h1>
+                <h1 class="ui center aligned header">{{ group_post.title }}</h1>
             </div>
             <div class="ui hidden divider"></div>
             <div class="ui horizontal list">
@@ -55,45 +55,97 @@
                         <img src="{% static 'img/avatar/' %}{{ ''|random_avatar }}" alt="默认头像" class="ui circular avatar bordered image" style="filter: invert(0);">
                     {% endif %}
                     <div class="content">
-                        <div class="ui sub header">@ {{ post.author }}</div>
-                        last modified at {{ post.last_modified|time_ago }}
+                        <div class="ui sub header">@ {{ group_post.sponser }}</div>
+                        created at at {{ group_post.create_at|time_ago }}
                     </div>
                 </div>
             </div>
             <div class="ui hidden divider"></div>
             <div class="description">
-                {% with post.content|markdown_to_html as rendered_content %}
-                {{ rendered_content|safe }}
-                {% endwith %}
+                {% if group_post.participants.count < group_post.min_participants %}
+                <div class="ui negative message">
+                    <div class="header">
+                        Not yet met the requirements.
+                    </div>
+                </div>
+                {% else %}
+                <div class="ui positive message">
+                    <div class="header">
+                        Already meets the requirements.
+                    </div>
+                </div>
+                {% endif %}
+                {% if current_time > group_post.target_time %}
+                <div class="ui warning message">
+                    <div class="header">
+                        This post is no longer valid.
+                    </div>
+                    Please look for other group activity posts, as the scheduled time for this post has passed.
+                </div>
+                {% endif %}
+                <div class="content">
+                    {% if group_post.content %}
+                        {% with group_post.content|markdown_to_html as rendered_content %}
+                        {{ rendered_content|safe }}
+                        {% endwith %}
+                    {% endif %}
+                </div>
+                <div class="ui divider hidden"></div>
+                <div class="ui three cards">
+                    <div class="ui fluid card">
+                        <div class="content">
+                            <div class="center aligned header">
+                                scheduled time
+                            </div>
+                            <div class="center aligned description">
+                                {{ group_post.target_time }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui fluid card">
+                        <div class="content">
+                            <div class="center aligned header">
+                                destination
+                            </div>
+                            <div class="center aligned description">
+                                {{ group_post.address }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui fluid card">
+                        <div class="content">
+                            <div class="center aligned header">
+                                Current situation
+                            </div>
+                            <div class="center aligned description">
+                                {{ group_post.participants.count }}/{{ group_post.max_participants }}<br/> ({{ group_post.min_participants }} &nbsp; Required)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
-            <div class="ui hidden divider"></div>
-            {% if post.images.all %}
-                <div class="ui vertical items">
-                    {% for image in post.images.all %}
-                        <div class="ui image image-container">
-                            <a href="{{ image.image.url }}" data-lightbox="post-images">
-                                <img src="{{ image.image.url }}" style="filter: invert(0);height: 100%;width: auto;object-fit: cover;" alt="Post image">    
-                            </a>
+            <div class="ui hidden section divider"></div>
+            <div class="ui extra content">
+                <div class="content" style="text-align: center ;">
+                    <button class="ui basic brown large button" >Join</button>
+                </div>
+                <h4 class="ui horizontal left aligned section divider header">
+                    Current joined user
+                  </h4>
+                <div class="ui horizontal list">
+                    {% for participant in group_post.participants.all %}
+                        <div class="item with_popup" data-title="{{ participant.username }}" data-content="{{ participant.email }}" data-position="bottom left">
+                            {% if participant.profile.avatar %}
+                                <img src="{{ participant.profile.avatar.url }}" alt="{{ participant.username }}" class="ui avatar bordered image" style="filter: invert(0);" >
+                            {% else %}
+                                <img src="{% static 'img/avatar/' %}{{ ''|random_avatar }}" alt="默认头像" class="ui avatar bordered image" style="filter: invert(0);">
+                            {% endif %}
+                            <div class="content">
+                                <div class="header">{{ participant.username }}</div>
+                            </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% endif %}
-            <div class="ui hidden divider"></div>
-            <div class="ui extra content">
-                {% for tag in post.tag.all %}
-                    <div class="ui label">{{ tag.name }}</div>
-                {% endfor %}
-            </div>
-            <div class="ui divider"></div>
-            <div class="ui list">
-                <div class="ui item ">
-                    <div class="ui content">
-                        <a class="ui like right floated" id="like-button" style="color: grey;">
-                            <i class="heart outline icon grey"></i> {{ post.likes }} Likes
-                        </a>
-                        <i class="eye outline icon grey"></i>
-                        {{ post.click }}
-                    </div>
                 </div>
             </div>
         </div>
@@ -110,20 +162,20 @@
                 </div>
             </div>
             <div class="content">
-                <div class="header">{{ post.author.username}}</div>
+                <div class="header">{{ group_post.sponser.username}}</div>
                 <div class="meta">
                     <a>@ {% if post.author.is_staff %} Administrator {% else %} User {% endif %}</a>
                 </div>
                 <div class="description">
                     <a href="mailto:{{ post.author.email }}" style="color: grey;">
                         <i class="envelope outline icon"></i>
-                        {{ post.author.email }}
+                        {{ group_post.sponser.email }}
                     </a>
                 </div>
             </div>
             <div class="extra content">
                 <span class="right floated">
-                    Joined in {{ post.author.date_joined|date:"Y-m-d" }}
+                    Joined in {{ group_post.sponser.date_joined|date:"Y-m-d" }}
                 </span>
             </div>
         </div>
@@ -135,10 +187,6 @@
 {% block script %}
 <script>
     $(document).ready(function () {
-        $('#like-button').click(function () {
-            $(this).find('i').toggleClass('outline red grey'); // 切换类
-        });
-
     });
 
     const apiUrl = "{% url 'search-post' %}?q={query}";
@@ -156,6 +204,9 @@
                     $('.main.menu').css('margin-top', '0px');
                 }
             });
+            $('.with_popup')
+            .popup()
+            ;
             $('.ui.search')
                 .search({
                     preserveHTML: false,
@@ -209,10 +260,5 @@
                 ;
         })
         ;
-        lightbox.option({
-            'fadeDuration': 200,     
-            'resizeDuration': 200,  
-            'wrapAround': true,       
-        });
 </script>
 {% endblock %}

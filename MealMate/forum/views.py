@@ -45,9 +45,13 @@ def post_detail(request, uuid):
     post = get_object_or_404(Post, id=uuid)
     post.click += 1
     post.save(update_fields=['click'])
-    images = ['cat1.png', 'cat2.png', 'cat3.png', 'cat4.png']
-    selected_image = random.choice(images)
-    return render(request, 'post_detail.html', {'forums':forums,'post': post,'selected_image': selected_image,})
+    return render(request, 'post_detail.html', {'forums':forums,'post': post,})
+
+def group_detail(request, uuid):
+    forums = Forum.objects.all()
+    current_time = timezone.now()
+    group_post = get_object_or_404(GroupPost, id=uuid)
+    return render(request, 'group_post_detail.html', {'forums':forums,'group_post': group_post,'current_time':current_time,})
 
 @csrf_exempt
 def create_tag(request):

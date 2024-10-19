@@ -34,6 +34,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/search.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/transition.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/progress.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/popup.min.css' %}">
 
     <style type="text/css">
         .hidden.menu {
@@ -124,9 +125,31 @@
             position: relative;
         }
 
+        .avatar-group {
+            position: relative;
+            display: block;
+            align-items: center;
+        }
+        .avatar-group img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .avatar-group .more-avatars {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e1e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
+        }
+
         @media only screen and (max-width: 1023px){
             .hidden_menu{
-                display: none !important; /* 改成折叠？or icons */
+                display: none !important; 
             }
         }
         @media only screen and (max-width: 700px) {
@@ -170,6 +193,7 @@
     <script src="{% static 'sementic/dist/components/progress.js' %}"></script>
     <script src="{% static 'sementic/dist/components/search.js' %}"></script>
     <script src="{% static 'sementic/dist/components/transition.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/popup.min.js' %}"></script>
     <script src="{% static 'sementic/dist/components/dropdown.js' %}"></script>
 
 
