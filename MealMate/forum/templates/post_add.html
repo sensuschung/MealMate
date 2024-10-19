@@ -88,19 +88,85 @@
                     <!-- end tag -->
                     <div class="ui divider hidden"></div>
                     <!-- error message -->
-                    {% if error_message %}
-                        <div class="ui error message">
-                            <div class="header">Submission Failed</div>
-                            <p>{{ error_message }}</p>
-                        </div>
-                    {% endif %}
+                    <div class="ui error message hidden">
+                        <div class="header">Submission Failed</div>
+                        <p>{{ error_message }}</p>
+                    </div>
                     <!-- end error_message -->
-                    <button class="ui basic brown large button" type= "submit">Submit</button>
+                    <div style="text-align:center ;">
+                        <button class="ui basic brown large button" type= "submit">Save</button>
+                    </div>
                 </div>
                 
                 <div style="display:none;" class="grouped_activities">
-                    <h3>Grouped Activities Content</h3>
-                    <p>This is the content for grouped activities.</p>
+                    <div class="ui divider"></div>
+                    <!-- title -->
+                    <div class="required field">
+                        <label>Title</label>
+                        <div class="fields">
+                          <div class="sixteen wide field">
+                            <input type="text" name="title1" placeholder="Please input title for post..." value="{{ title }}">
+                          </div>
+                        </div>
+                    </div>
+                    <!-- endtitle -->
+                    <!-- address -->
+                    <div class="required field">
+                        <label>Destination</label>
+                        <div class="fields">
+                          <div class="sixteen wide field">
+                            <input type="text" name="address" placeholder="Please input your destinstion" value="{{ address }}">
+                          </div>
+                        </div>
+                    </div>
+                    <!-- end address -->
+                    <!-- schedule -->
+                    <div class="required field">
+                        <label>Schedule Time</label>
+                        <div class="ui calendar">
+                          <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="Pick up datetime for schedule." name="target_time" value="{{ target_time }}">
+                          </div>
+                        </div>
+                    </div>
+                    <!-- end schedule -->
+                    <!-- min and max -->
+                    <div class="two fields">
+                        <div class="required field">
+                            <label>Minimum Turnout</label>
+                            <div class="fields">
+                              <div class="sixteen wide field">
+                                <input type="number" name="min" placeholder="Minimum number for participants" value="{{ min }}">
+                              </div>
+                            </div>
+                        </div>
+                        <div class="required field">
+                            <label>Maximum Turnout</label>
+                            <div class="fields">
+                              <div class="sixteen wide field">
+                                <input type="number" name="max" placeholder="Maximum number for participants" value="{{ max }}">
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end min/max -->
+                    <!-- content -->
+                    <div class="field">
+                        <label>Content</label>
+                        <textarea id="markdown-editor1" name="content1">{{ content }}</textarea>
+                    </div>
+                    <!-- end content -->
+                    <div class="ui divider hidden"></div>
+                    <!-- error message -->
+                    <div class="ui error message hidden">
+                        <div class="header">Submission Failed</div>
+                        <p>{{ error_message }}</p>
+                    </div>
+                    <!-- end error_message -->
+                    <div style="text-align:center ;">
+                        <button class="ui basic brown large button" type= "submit">Save</button>
+                    </div>
                 </div>
             </form>
             <div class="selected_hidden" style="text-align: center;">
@@ -134,6 +200,9 @@ $(document)
         allowAdditions: true,
         ignoreSearchCase:false,    
     });
+    $('.ui.calendar')
+    .calendar()
+    ;
     $('#post-form').submit(function (event) {
         event.preventDefault();  
         
@@ -170,6 +239,10 @@ $(document)
 document.addEventListener("DOMContentLoaded", function() {
         const easyMDE = new EasyMDE({ 
             element: document.getElementById("markdown-editor"),
+            spellChecker: false
+        });
+        const easyMDE1 = new EasyMDE({ 
+            element: document.getElementById("markdown-editor1"),
             spellChecker: false
         });
     });

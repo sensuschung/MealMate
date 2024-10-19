@@ -77,52 +77,89 @@ def post_create_view(request):
     tags = Tag.objects.all()
     if request.method == 'POST':
         try:
-            title = request.POST.get('title')
-            forum_id = request.POST.get('forum_name')
-            content = request.POST.get('content')
-            tags_string = request.POST.get('tags')
-            tags = [tag.strip() for tag in tags_string.split(',')] if tags_string else []
-            forum = Forum.objects.get(id=forum_id)
-            author = request.user
             post_type = request.POST.get('type')
-            if (post_type):
-                post_type = "normal"
-            
-            content_markdown = markdown(content)
-            
-            post = Post.objects.create(
-                title=title,
-                author=author,
-                forum=forum,
-                content=content_markdown
-            )
-            
-            if request.FILES.getlist('images'):
-                for image_file in request.FILES.getlist('images'):
-                    post_image = PostImage.objects.create(image=image_file)
-                    post.images.add(post_image)
-            
-            for tag_name in tags:
-                tag, created = Tag.objects.get_or_create(name=tag_name)
-                post.tag.add(tag)
-            
-            messages.success(request, 'Post created successfully!')
+            if (post_type == 'normal'):
+                title = request.POST.get('title')
+                forum_id = request.POST.get('forum_name')
+                content = request.POST.get('content')
+                tags_string = request.POST.get('tags')
+                tags = [tag.strip() for tag in tags_string.split(',')] if tags_string else []
+                forum = Forum.objects.get(id=forum_id)
+                author = request.user
+                
+                content_markdown = markdown(content)
+                
+                post = Post.objects.create(
+                    title=title,
+                    author=author,
+                    forum=forum,
+                    content=content_markdown
+                )
+                
+                if request.FILES.getlist('images'):
+                    for image_file in request.FILES.getlist('images'):
+                        post_image = PostImage.objects.create(image=image_file)
+                        post.images.add(post_image)
+                
+                for tag_name in tags:
+                    tag, created = Tag.objects.get_or_create(name=tag_name)
+                    post.tag.add(tag)
+                
+                messages.success(request, 'Post created successfully!')
+            else :
+                title = request.POST.get('title1')
+                content = request.POST.get('content1')
+                sponser = request.user
+                address = request.POST.get('address')
+                target_time_str = request.POST.get('target_time')
+                max_participants = request.POST.get('max')
+                min_participants = request.POST.get('min')
+                target_time = datetime.strptime(target_time_str, '%B %d, %Y %I:%M %p')
+                target_time = timezone.make_aware(target_time)
+
+                content_markdown = markdown(content)
+
+                group_post = GroupPost.objects.create(
+                    title = title,
+                    sponser = sponser,
+                    content = content_markdown,
+                    address = address,
+                    target_time = target_time,
+                    max_participants = max_participants,
+                    min_participants = min_participants
+                )
+
+                group_post.participants.add(sponser)
+                messages.success(request, 'Post created successfully!')
 
             return JsonResponse({'status': 'success', 'message': 'Post created successfully!'})
         
         except Exception as e:
-            context = {
-                'username': request.user.username,
-                'forums': Forum.objects.all(),
-                'tags': Tag.objects.all(),
-                'post_type': post_type,
-                'title': title,
-                'forum_id': forum_id,
-                'content': content,
-                'selected_tags': tags,
-                'error_message': str(e)
-            }
-            print(e)
+            if (post_type == 'normal'):
+                context = {
+                    'username': request.user.username,
+                    'forums': Forum.objects.all(),
+                    'tags': Tag.objects.all(),
+                    'post_type': post_type,
+                    'title': title,
+                    'forum_id': forum_id,
+                    'content': content,
+                    'selected_tags': tags,
+                    'error_message': str(e)
+                }
+            else:
+                context = {
+                    'username': request.user.username,
+                    'forums': Forum.objects.all(),
+                    'post_type': post_type,
+                    'title': title,
+                    'address': address,
+                    'target_time':target_time_str,
+                    'max':max_participants,
+                    'min':min_participants,
+                    'content': content,
+                    'error_message': str(e)
+                }
             return render(request, 'post_add.html', context)
     
     return render(request,'post_add.html', {'forums':forums,'username': username,'tags':tags})

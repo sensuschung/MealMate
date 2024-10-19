@@ -24,13 +24,13 @@ class Forum(models.Model):
 
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100,blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE,default=1)
-    forum = models.ForeignKey(Forum,on_delete=models.CASCADE)
+    forum = models.ForeignKey(Forum,on_delete=models.CASCADE,blank=False)
     create_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     # restaurant = models.ForeignKey(to_be_determined,on_delete=models.SET_NULL,null=True)
-    content = models.TextField()
+    content = models.TextField(blank=False)
     images = models.ManyToManyField('PostImage', related_name='post_images', blank=True,null=True)
     tag = models.ManyToManyField(Tag)
     click = models.IntegerField(default=0,db_index=True)
@@ -46,12 +46,12 @@ class Post(models.Model):
 
 class GroupPost(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100,blank=False)
     create_at = models.DateTimeField(auto_now_add=True)
-    target_time = models.DateTimeField(db_index=True)
+    target_time = models.DateTimeField(db_index=True,blank=False)
     sponser = models.ForeignKey(User, related_name='sponsered_posts', on_delete=models.CASCADE)
     content = models.TextField(blank=True,null=True)
-    address = models.CharField(max_length=40,default="默认")
+    address = models.CharField(max_length=40,blank=False)
     participants = models.ManyToManyField(User,related_name="joined_user")
     max_participants = models.IntegerField(default=2)
     min_participants = models.IntegerField(default=2)
