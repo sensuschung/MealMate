@@ -294,17 +294,11 @@
                               <button class="ui button">Submit</button>
                             </div>
                           </div> -->
-                        <div class="ui dropdown item">
-                            Dropdown
-                            <div class="ui menu brown ">
-                              <div class="item">Action</div>
-                              <div class="item">Another Action</div>
-                              <div class="item">Something else here</div>
-                              <div class="divider"></div>
-                              <div class="item">Separated Link</div>
-                              <div class="divider"></div>
-                              <div class="item">One more separated link</div>
-                            </div>
+                        <div class="item" >
+                            <a class="ui right corner small red empty circular label {% if message_reminder_visible %}visible{% else %}hidden{% endif %}" id="messege_reminder"></a>
+                            <a href="{% url 'message_forum' %}" class="content">
+                                <i class="bell icon inverted"></i>
+                            </a>
                         </div>
                         <a class="ui inverted button">Log in</a>
                         <a class="ui inverted button">Sign Up</a>

@@ -63,13 +63,22 @@ class GroupPost(models.Model):
 class JoinRequest(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User,related_name='request_user',on_delete=models.CASCADE)
+    sponser = models.ForeignKey(User,related_name='join_group_requested_user',on_delete=models.CASCADE)
     target_post = models.ForeignKey(GroupPost,related_name='join_group_request',on_delete=models.CASCADE)
-    is_comfirmed = models.BooleanField(default=False)
+    create_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateField(auto_now=True)
+    is_confirmed = models.BooleanField(default=False)
     is_denied = models.BooleanField(default=False)
     is_valid = models.BooleanField(default=False)
+    state = models.IntegerField(default=0) # 0:created 1:sponser confirmed 2:user confirmed
 
     def __str__(self):
         return str(self.id)
+
+    class Meta:
+        constraints = [
+                models.UniqueConstraint(fields=['user', 'target_post'], name='unique_user_targetpost')
+            ]
 
 class PostImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -127,9 +127,11 @@
             </div>
             <div class="ui hidden section divider"></div>
             <div class="ui extra content">
+                {% if group_post.sponser.username != current_user.username %}
                 <div class="content" style="text-align: center ;">
-                    <button class="ui basic brown large button" >Join</button>
+                    <button class="ui basic brown large button {% if current_time > group_post.target_time %}disabled{% endif %}" id="join_button">Join</button>
                 </div>
+                {% endif %}
                 <h4 class="ui horizontal left aligned section divider header">
                     Current joined user
                   </h4>
@@ -260,5 +262,64 @@
                 ;
         })
         ;
+    document.getElementById("join_button").addEventListener("click", function() {
+        fetch("{% url 'join_group' group_post.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}", 
+                "Content-Type": "application/json"
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                $('body').toast({
+                    title: 'Request created successfully',
+                    message: 'Please wait for the initiator\'s review.',
+                    class : 'success',
+                    closeIcon: true,
+                    className: {
+                        toast: 'ui message'
+                    }
+                    })
+                ;
+            } else if (data.status === 'error') {
+                if(data.message){
+                    $('body').toast({
+                        message: data.message,
+                        class : 'error',
+                        closeIcon: true,
+                        className: {
+                            toast: 'ui message'
+                        }
+                        })
+                    ;
+                }
+                else{
+                    $('body').toast({
+                        message: 'Joining the group failed, please try again later.',
+                        class : 'error',
+                        closeIcon: true,
+                        className: {
+                            toast: 'ui message'
+                        }
+                        })
+                    ;
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Request error", error);
+            $('body').toast({
+                    message: 'There is a problem with the request, please try again later.',
+                    class : 'error',
+                    closeIcon: true,
+                    className: {
+                        toast: 'ui message'
+                    }
+                    })
+            ;
+        });
+    });
 </script>
 {% endblock %}

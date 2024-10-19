@@ -22,7 +22,7 @@
             <div class="ui stackable three column grid">
                 {% for group_post in group_posts %}
                 <div class="column">
-                    <div class="ui fluid card">
+                    <a class="ui fluid card" href="{% url 'group_detail' group_post.id %}">
                         <div class="content">
                             <div class="right floated meta">at {{ group_post.create_at|time_ago }}</div>
                             {{ group_post.sponser.username }}
@@ -32,21 +32,15 @@
                             <div class="description">{{ group_post.address }}<br />{{ group_post.target_time }}</div>
                         </div>
                         <div class="extra content">
-                            <a>
-                                <i class="user icon"></i>
-                                Joined {{group_post.participants.count}}/{{group_post.max_participants}}
-                            </a>
+                            <i class="user icon"></i>
+                            Joined {{group_post.participants.count}}/{{group_post.max_participants}}
                         </div>
-                        <div class="ui bottom attached yellow progress" data-value="{{group_post.participants.count}}"
-                            data-total="{{group_post.max_participants}}">
-                            <div class="bar"></div>
-                        </div>
-                    </div>
+                    </a>
                 </div>
                 {% endfor %}
             </div>
             <h4 class="ui horizontal header divider">
-                <a href="#" style="color:#b62f2f">More Group Dining Activities</a>
+                <a href="{% url 'group_post_list' %}" style="color:#b62f2f">More Group Dining Activities</a>
             </h4>
             <div class="row">
                 <div class="ui middle aligned divided items">
