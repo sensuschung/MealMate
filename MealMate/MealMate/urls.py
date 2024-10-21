@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from management.views import home_view
-from forum.views import forum_home_view,forum_post_view,post_detail,post_create_view,create_tag,group_post_view,group_detail,join_group,forum_message_view,pass_request,reject_request,confirm_request
+from forum.views import forum_home_view,forum_post_view,post_detail,post_create_view,create_tag,group_post_view,group_detail,join_group,forum_message_view,pass_request,reject_request,confirm_request,delete_post,delete_group_post,edit_post
 from django.conf import settings
 from django.conf.urls.static import static
 from api.views import PostListView,SearchPostView
@@ -39,4 +39,7 @@ urlpatterns = [
     path('forum/pass/<uuid:join_request_id>/', pass_request, name='pass_request'),
     path('forum/reject/<uuid:join_request_id>/', reject_request, name='reject_request'),
     path('forum/confirm/<uuid:join_request_id>/', confirm_request, name='confirm_request'),
+    path('forum/post/delete/<uuid:post_id>/', delete_post, name='delete_post'),
+    path('forum/group_post/delete/<uuid:post_id>/', delete_group_post, name='deletegroup__post'),
+    path('forum/post/edit/<uuid:post_id>/', edit_post, name='edit_post'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

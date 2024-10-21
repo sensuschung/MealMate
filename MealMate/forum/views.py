@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 from forum.models import GroupPost,Post,Forum,Tag,PostImage,JoinRequest
 from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
 import random
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -74,12 +75,14 @@ def group_post_view(request):
 
 
 def post_detail(request, uuid):
+    current_user = request.user
     message_reminder_visible = base_view(request)
     forums = Forum.objects.all()
     post = get_object_or_404(Post, id=uuid)
     post.click += 1
+    content = markdown(post.content)
     post.save(update_fields=['click'])
-    return render(request, 'post_detail.html', {'forums':forums,'post': post,'message_reminder_visible': message_reminder_visible,})
+    return render(request, 'post_detail.html', {'forums':forums,'post': post,'message_reminder_visible': message_reminder_visible,'current_user':current_user,'content':content,})
 
 def group_detail(request, uuid):
     message_reminder_visible = base_view(request)
@@ -87,7 +90,8 @@ def group_detail(request, uuid):
     forums = Forum.objects.all()
     current_time = timezone.now()
     group_post = get_object_or_404(GroupPost, id=uuid)
-    return render(request, 'group_post_detail.html', {'forums':forums,'group_post': group_post,'current_time':current_time,'current_user':current_user,'message_reminder_visible': message_reminder_visible,})
+    content = markdown(group_post.content)
+    return render(request, 'group_post_detail.html', {'forums':forums,'group_post': group_post,'current_time':current_time,'current_user':current_user,'message_reminder_visible': message_reminder_visible,'content':content,})
 
 @csrf_exempt
 def create_tag(request):
@@ -124,13 +128,11 @@ def post_create_view(request):
                 forum = Forum.objects.get(id=forum_id)
                 author = request.user
                 
-                content_markdown = markdown(content)
-                
                 post = Post.objects.create(
                     title=title,
                     author=author,
                     forum=forum,
-                    content=content_markdown
+                    content=content
                 )
                 
                 if request.FILES.getlist('images'):
@@ -154,12 +156,10 @@ def post_create_view(request):
                 target_time = datetime.strptime(target_time_str, '%B %d, %Y %I:%M %p')
                 target_time = timezone.make_aware(target_time)
 
-                content_markdown = markdown(content)
-
                 group_post = GroupPost.objects.create(
                     title = title,
                     sponser = sponser,
-                    content = content_markdown,
+                    content = content,
                     address = address,
                     target_time = target_time,
                     max_participants = max_participants,
@@ -248,3 +248,80 @@ def confirm_request(request, join_request_id):
         join_request.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': True})
+
+@require_http_methods(["DELETE"])
+def delete_post(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+        post.delete()
+        return JsonResponse({'message': 'Post deleted successfully.'}, status=204)
+    except Post.DoesNotExist:
+        return JsonResponse({'error': 'Post not found.'}, status=404)
+
+@require_http_methods(["DELETE"])
+def delete_group_post(request, post_id):
+    try:
+        post = GroupPost.objects.get(id=post_id)
+        post.delete()
+        return JsonResponse({'message': 'Post deleted successfully.'}, status=204)
+    except GroupPost.DoesNotExist:
+        return JsonResponse({'error': 'Post not found.'}, status=404)
+
+def edit_post(request, post_id):
+    message_reminder_visible = base_view(request)
+    current_user = request.user
+    forums = Forum.objects.all()
+    tags = Tag.objects.all()
+    post = Post.objects.get(id=post_id)
+    title = post.title
+    forum_id = post.forum.id
+    content = post.content
+    tag_names = post.tag.values_list('name', flat=True)
+    author = post.author
+
+    if request.method == 'POST':
+        try:
+            title = request.POST.get('title')
+            forum_id = request.POST.get('forum_name')
+            content = request.POST.get('content')
+            tags_string = request.POST.get('tags')
+            tags = [tag.strip() for tag in tags_string.split(',')] if tags_string else []
+            forum = Forum.objects.get(id=forum_id)
+            author = request.user
+
+            post.title = title
+            post.forum = forum
+            post.content = content
+            print(content)
+
+            post.save()
+
+            if request.FILES.getlist('images'):
+                for image_file in request.FILES.getlist('images'):
+                    post_image = PostImage.objects.create(image=image_file)
+                    post.images.add(post_image)
+            
+            for tag_name in tags:
+                tag, created = Tag.objects.get_or_create(name=tag_name)
+                if not post.tag.filter(name= tag.name).exists():
+                    post.tag.add(tag)
+
+            messages.success(request, 'Post edited successfully!')
+
+            return JsonResponse({'status': 'success', 'message': 'Post edited successfully!'})
+
+        except Exception as e:
+            context = {
+                'username': request.user.username,
+                'forums': Forum.objects.all(),
+                'tags': Tag.objects.all(),
+                'title': title,
+                'forum_id': forum_id,
+                'content': content,
+                'tag_names': tags_string,
+                'error_message': str(e),
+                'post_id':post_id,
+            }
+            return render(request, 'post_edit.html', context)
+    
+    return render(request,'post_edit.html',{'forums':forums,'tags':tags,'message_reminder_visible': message_reminder_visible,'username': current_user,'title':title,'forum_id':forum_id,'content':content,'tag_names':tag_names,'author':author,'post_id':post_id,})

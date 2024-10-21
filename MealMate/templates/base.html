@@ -9,7 +9,7 @@
     <script src="{% static 'js/jQuery/jquery-3.7.1.min.js' %}"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static 'js/easymde/easymde.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'js/lightbox/lightbox.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lightbox/css/lightbox.min.css' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/semantic.min.css' %}">
     <title>Homepage - Fomantic</title>
@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/segment.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/button.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/list.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/modal.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/icon.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/sidebar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/search.css' %}">
@@ -185,12 +186,13 @@
     <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
     <script src="{% static 'js/easymde/easymde.js' %}"></script>
     <script src="{% static 'sementic/dist/semantic.js' %}"></script>
-    <script src="{% static 'js/lightbox/lightbox.min.js' %}"></script>
+    <script src="{% static 'lightbox/js/lightbox.min.js' %}"></script>
 
     <script src="{% static 'sementic/dist/components/visibility.js' %}"></script>
     <script src="{% static 'sementic/dist/components/sidebar.js' %}"></script>
     <script src="{% static 'sementic/dist/components/checkbox.js' %}"></script>
     <script src="{% static 'sementic/dist/components/progress.js' %}"></script>
+    <script src="{% static 'sementic/dist/components/modal.js' %}"></script>
     <script src="{% static 'sementic/dist/components/search.js' %}"></script>
     <script src="{% static 'sementic/dist/components/transition.js' %}"></script>
     <script src="{% static 'sementic/dist/components/popup.min.js' %}"></script>
@@ -355,7 +357,7 @@
                   </div>
                 </div>
                 <div class="ui inverted section divider"></div>
-                <img src="assets/images/logo.png" class="ui centered mini image">
+                <img src="{% static 'img/avatar/cat1.png' %}" class="ui centered mini image">
                 <div class="ui horizontal inverted small divided link list">
                   <a class="item" href="#">Site Map</a>
                   <a class="item" href="#">Contact Us</a>

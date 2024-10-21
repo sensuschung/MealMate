@@ -176,6 +176,17 @@ $(document)
                 }
              )
         ;
+        if (localStorage.getItem('postDeleted')) {
+            $('body').toast({
+                title: 'Delete post successfully',
+                class: 'success',
+                closeIcon: true,
+                className: {
+                    toast: 'ui message'
+                }
+            });
+            localStorage.removeItem('postDeleted');
+        }
 
 })
 ;
