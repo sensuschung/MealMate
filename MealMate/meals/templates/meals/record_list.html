@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+{% load static %}
+{% load meal_filters %}
+{% csrf_token %}
+{% load custom_tags %}
+
+
+
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" href="{% static 'meals/styles.css' %}">
+    <title>三餐记录</title>
+</head>
+<body style=" padding: 20px;">
+    <header>
+       
+    </header>
+    <main>
+        <div class="container"  style="display: flex;">  
+
+            <div class="calorie-statistics" style = "flex: 1; text-align: center;">
+                <div class="calorie-container">
+                    <div class="calorie-circle-wrapper">
+                        <canvas id="calorieCircle"></canvas>
+                        <div class="calorie-text">
+                            
+                                {% if remaining_calories >= 0 %}
+                                <h5 class="ui grey header">还可以吃</h5>
+                                <h2>{{ remaining_calories }} </h2>
+                                {% else %}
+                                    <h5 class="ui grey header">已经超过</h5>
+                                    <h2 style="color: red;"> {{ remainingcalories }}</h2>
+                                {% endif %}
+                           
+                            <h4 class="ui grey header">卡</h4>
+                        </div>
+                    </div>
+                    <div class="calorie-info" style="margin: 20px">
+                        <p>已摄入卡路里: {{ total_intake }} 卡</p>
+                    </div>
+                </div>
+                <div class="calorie-info" style="margin-top: 10px;">
+                    <h3 id="calorie-goal-display" style="display: inline-block; margin-right: 10px;">每日计划摄入: <span id="current-calorie-goal">{{ daily_calorie_goal }}</span> 卡</h3>
+                    <input type="number" id="calorie-goal-input" style="display: none; width: 70px;" placeholder="千卡">
+                    <button id="set-calorie-goal" class="ui button">设置</button>
+                </div>
+                <div class="input-group" >
+                    <h3 class="ui left floated header" style="margin-bottom:0;margin-top:5px;">Recommended Calories </h3>
+                    <div class="ui divider" style="margin-bottom:1rem;margin-top:0;"></div>  
+                    <div id="gender">
+                        <label for="gender" style="display: flex; align-items: center;">
+                            性别:
+                            <span style="flex-grow: 1; display: flex; justify-content: space-around;">
+                                <label>
+                                    <input type="radio" id="female" name="gender" value="female" required>
+                                    女
+                                </label>
+                                <label>
+                                    <input type="radio" id="male" name="gender" value="male" required>
+                                    男
+                                </label>
+                            </span>
+                        </label>
+                    </div>
+                    <label for="age"  style="text-align: left; ">年龄:
+                     <input type="number" id="age" name="age" min="1" max="99" required >
+                    </label>                 
+                    <label for="weight"  style ="text-align: left;">体重:
+                     <input type="number" id="weight" name="weight" min="1"required >
+                     kg
+                    </label>
+                    <label for="height"  style ="text-align: left; ">身高:
+                     <input type="number" id="height" name="height" min="1"required >
+                      cm
+                    </label>
+                    <div class="calorie-option">
+                     <h5>Maintain Weight:</h5>
+                     <span id="maintainCalories">-</span>
+                    </div>
+                    <div class="calorie-option">
+                      <h5>Lose ~0.5 kg p er week:</h5>
+                      <span id="loseCalories">-</span>    
+                    </div>   
+                </div>     
+            </div>
+                       
+            <div class="meal-cards-container">                 
+                <div class="meal-cards" id="meal-cards">
+                    <h2>
+                        <div class="date-navigation-card"  >
+                            <button id="prev-date">←</button>
+                            <span id="current-date" style="font-size:1em;">{{ current_date }}</span>
+                            <button id="next-date">→</button>
+                            <input type="text" id="datepicker" style="display:none;">        
+                        </div>
+                    </h2>
+                    <div class="ui fluid icon input">
+                        <i class="search icon"></i>
+                        <input type="text" id="search-input" placeholder="Search..." oninput="searchMeals()">
+                    </div>                                    
+                    <div  class="ui unstackable items" id="search-results" ></div>
+                    <div id="pagination" class="pagination" style="display: none;padding-bottom:10px;">
+                        <p id="total-count" ></p>
+                        <span id="total-pages" style="padding-left:10px;">   共 <span id="page-count">0</span> 页</span>
+                        <button id="prev-button" style="display: none;">上一页</button>
+                        <input type="number" id="page-input" min="1" style="width: 40px; display: none;">
+                        <button id="go-button" style="display: none;">跳转</button>
+                        <button id="next-button" style="display: none;">下一页</button>
+                    </div>
+                    {% for meal_type, display_name in meal_types_display %}
+                        <div class="meal-card">
+                            <div class="card-header">
+                                <h2>{{ display_name }}</h2>
+                                <div class="button-container">
+                                    <button class="add-btn" data-meal-type="{{ meal_type }}">➕</button>
+                                    <button class="toggle-delete-btn" style="font-size: 0.8em;">➖</button>
+                                </div>
+                            </div>
+                            <ul>
+                                {% with categorized_meals|get_item:meal_type as meals %}
+                                    {% if meals %}
+                                        {% for meal in meals %}
+                                            <li class="meal-item">
+                                                <div class="meal-image">
+                                                    {% if meal.image %}
+                                                        <img src="{{ meal.image.url }}" alt="meal image">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="meal-details">
+                                                    <p class="meal-name">{{ meal.name }}</p>
+                                                    <p class="meal-comment">{% if meal.comment %}评论: {{ meal.comment }}{% endif %}</p>
+                                                </div>
+                                                <div class="meal-calories">
+                                                    <p>{{ meal.calories }} 卡</p>
+                                                </div>
+                                                <button class="delete-btn" data-meal-id="{{ meal.id }}" style="display: none;">➖</button>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endwith %}
+                            </ul>
+                        </div>
+                    {% endfor %}                  
+                </div>
+            </div>
+            
+            <div class="left" style="flex: 1; overflow-y: auto;">
+                <div class="calendar-container" > 
+                    <h3 class="ui left floated header" style="margin-bottom:0;margin-top:5px;">Track Calendar </h3>
+                    <div class="ui divider" style="margin-bottom:1rem;margin-top:0;"></div>
+                   <div id="calendar"></div>
+                </div>
+                <div class="calendar-container" > 
+                    <h1>上周最爱吃的餐点</h1>
+                    <ul>
+                        {% for meal_type, meals in favorite_meals.items %}
+                            <li>
+                                {% if meal_type == 'breakfast' %}
+                                    早餐:
+                                {% elif meal_type == 'lunch' %}
+                                    午餐:
+                                {% elif meal_type == 'dinner' %}
+                                    晚餐:
+                                {% elif meal_type == 'more' %}
+                                    加餐:
+                                {% endif %}
+                                <ul>
+                                {% if meals %}
+                                    {% for meal in meals %}
+                                        <li>
+                                            <strong>{{ meal.name }}</strong> - 吃了 {{ meal.count }} 次，卡路里: {{ meal.calories }}
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                </div>    
+            </div>
+
+        </dic>           
+
+        <!-- 添加记录的弹窗 -->
+        <div id="add-modal" class="modal" >
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 id="modal-title">早餐 — 添加</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="meal-type" name="meal_type">
+                    <div class="form-group">
+                        <label for="name">食物名称</label>
+                        <input type="text" id="name" name="name" required>                       
+                    </div>
+                    <div class="form-group">
+                        <label for="calories">卡路里</label>
+                        <input type="number" id="calories" name="calories" value="1" min="1" required>
+                        <p id="calorie-suggestion" style="color: red; font-size: 1.4em;"></p> <!-- 显示卡路里建议 -->
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">评论</label>
+                        <textarea id="comment" name="comment" rows="4" placeholder="请输入评论..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">图片添加</label>
+                        <input type="file" id="image" name="image" accept="image/*">
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="submit-btn">添加</button>
+                        <button type="button" class="cancel-btn">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        
+        
+    </main>    
+    
+    <script src="{% static 'meals/script.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+
+    <script>
+        const dailyCalorieGoal = {{ daily_calorie_goal }};
+        const netCalories = Math.min((dailyCalorieGoal - {{ remaining_calories }}), (dailyCalorieGoal + {{ remaining_calories }}));
+        const progressPercentage = Math.max(0, Math.min(1, (netCalories / dailyCalorieGoal))); // 确保在0到1之间
+    
+        let color1, color2; // 定义颜色变量
+        if ({{ remaining_calories }} < 0) { // 检查是否为负数
+            color1 = 'red'; // 摄入部分颜色
+            color2 = '#FF6384'; // 消耗部分颜色
+            pro=1-progressPercentage;
+        } else {
+            color1 = '#FF6384'; // 消耗部分颜色
+            color2 = '#C0C0C0'; // 摄入部分颜色
+            pro=progressPercentage;
+        }
+    
+        const calorieCircle = new Chart(document.getElementById('calorieCircle').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['摄入', '消耗'],
+                datasets: [{
+                    data: [pro, 1 - pro],
+                    backgroundColor: [color1, color2],
+                    hoverBackgroundColor: ['#FF6384', '#36A2AEB']
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+    
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 切换删除按钮显示状态
+            const toggleDeleteButtons = document.querySelectorAll('.toggle-delete-btn');
+            
+            toggleDeleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealCard = this.closest('.meal-card');
+                    const deleteButtons = mealCard.querySelectorAll('.delete-btn');
+                    
+                    deleteButtons.forEach(delBtn => {
+                        // 切换显示状态
+                        if (delBtn.style.display === 'none' || delBtn.style.display === '') {
+                            delBtn.style.display = 'inline-block';
+                        } else {
+                            delBtn.style.display = 'none';
+                        }
+                    });
+                });
+            });
+    
+            // 删除记录
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const mealId = this.getAttribute('data-meal-id');
+                    fetch(`/delete_meal/${mealId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 从 DOM 中删除对应的餐记录
+                            this.closest('.meal-item').remove();
+                             location.reload();  // 刷新当前页面
+                        } else {
+                            alert('删除失败: ' + data.error);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // 获取后端传递的当前年和月
+            var initialYear = {{ current_year }};
+            var initialMonth = {{ current_month }} - 1;  // JavaScript 的月份从0开始，因此减去1
+
+            // 计算当前日期
+            var today = moment().format('YYYY-MM-DD'); // 获取今天的日期
+
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'today'
+                },
+                height: 'auto',
+                border: 'none',
+                defaultDate: new Date(initialYear, initialMonth),  // 使用传递的年和月初始化日历
+                events: [
+                    {% for date_key, color in calendar_data.items %}
+                    {
+                        start: '{{ date_key }}',
+                        color: '{{ color }}'
+                    },
+                    {% endfor %}
+                ],
+                viewRender: function(view, element) {
+                    // 获取当前显示的年份和月份
+                    var currentYear = view.intervalStart.year();
+                    var currentMonth = view.intervalStart.month() + 1;  // JavaScript月份从0开始
+        
+                    // 请求新的日历数据
+                    $.ajax({
+                        url: `/get_calendar_data/${currentYear}/${currentMonth}/`,  // 动态请求新月份的数据
+                        type: 'GET',
+                        success: function(data) {
+                            // 清除当前事件
+                            $('#calendar').fullCalendar('removeEvents');
+        
+                            // 添加新事件
+                            for (var date_key in data) {
+                                if (data.hasOwnProperty(date_key)) {
+                                    $('#calendar').fullCalendar('renderEvent', {
+                                        start: date_key,
+                                        color: data[date_key]
+                                    }, true);  // stick = true
+                                }
+                            }
+        
+                           
+        
+                            // 遍历所有日单元格，直接修改背景色
+                            $('.fc-day').each(function() {
+                                var date = $(this).data('date');  // 获取单元格对应的日期
+                                if (data[date]) {
+                                    $(this).css('background-color', data[date]);  // 设置背景色
+                                } else {
+                                    $(this).css('background-color', '');  // 重置为默认背景
+                                }
+                            });
+
+                            $('.fc-day').each(function() {
+                                var date = $(this).data('date');
+                                var message = '';
+        
+                                if (data[date] === 'red') {
+                                    message = 'Too much calorie intake';
+                                } else if (data[date] === 'green') {
+                                  
+                                    message = 'Moderate calorie intake';
+                                } else if (data[date] === 'yellow') {
+                                 
+                                    message = 'Little calorie intake';
+                                } else {
+                                    message = 'Not Tracked';
+                                }
+        
+                                if (message) {
+                                    $(this).data('message', message);  // 存储消息
+                                }
+                            });
+        
+                            // 隐藏不是当前月份的日期
+                            $('.fc-day').each(function() {
+                                if ($(this).hasClass('fc-other-month')) {
+                                    $(this).css('border', 'none');
+                                    $(this).css('border-top', '#ddd solid 1px');
+                                }
+                            });
+        
+                            $('.fc-day-top').each(function() {
+                                if ($(this).hasClass('fc-other-month')) {
+                                    $(this).css('color', 'white');
+                                }
+                            });
+                        },
+                        error: function() {
+                            console.log("Error fetching calendar data.");
+                        }
+                    });
+        
+                    // 隐藏星期标题行
+                    $('.fc-day-header').hide();
+                },
+                dayClick: function(date) {
+                    var selectedDate  = date.format();  // 获取点击的日期
+
+                // 判断是否允许跳转
+                if (!($(this).hasClass('fc-other-month')) ){
+                if (selectedDate <= today) {
+                        window.location.href = '/?date=' + selectedDate ;  // 重定向到记录页面，并附加日期参数
+                    }
+                }},
+                eventClick: function(event) {
+                    var clickedDate = event.start.format();  // 获取 event 的开始日期
+                    var message = event.color === 'red' ? 'Too much calorie intake' :
+                    event.color === 'green' ? 'Moderate calorie intake' :
+                    event.color === 'yellow' ? 'Little calorie intake' :
+                    event.color === 'white' ? 'Not Tracked' :
+                    '';
+                    if ( message) {
+                        window.location.href = '/?date=' + clickedDate;  // 跳转到记录页面，并附加日期参数
+                    }
+                },
+                
+                eventMouseover: function(event, jsEvent, view) {
+                    var message = event.color === 'red' ? 'Too much calorie intake' :
+                                  event.color === 'green' ? 'Moderate calorie intake' :
+                                  event.color === 'yellow' ? 'Little calorie intake' :
+                                  event.color === 'white' ? 'Not Tracked' :
+                                  '';
+                
+                    if (message) {
+                        // 创建 tooltip，并添加相应的类
+                        var tooltipClass = event.color; // 使用事件的颜色作为类名
+                        $('<div class="tooltip ' + tooltipClass + '">' + message + '</div>')
+                            .appendTo('body')
+                            .css({
+                                top: jsEvent.pageY + 10,
+                                left: jsEvent.pageX + 10
+                            })
+                            .fadeIn(200);
+                    }
+                },
+                eventMouseout: function(event, jsEvent, view) {
+                    $('.tooltip').remove(); // 隐藏消息
+                }
+            });
+        });
+    </script>
+           
+    <script>
+      document.getElementById('set-calorie-goal').addEventListener('click', function() {
+      const displayElement = document.getElementById('current-calorie-goal');
+      const inputElement = document.getElementById('calorie-goal-input');
+
+      if (inputElement.style.display === 'none') {
+        inputElement.style.display = 'inline-block';
+        inputElement.value = '';
+        inputElement.focus();
+      } else {
+        const newGoal = parseFloat(inputElement.value);
+
+        // 输入验证
+        if (isNaN(newGoal) || newGoal <= 0) {
+            inputElement.value = '';
+            inputElement.style.display = 'none';
+            return;
+        }
+
+        // AJAX 请求更新卡路里目标
+        fetch('/set-calorie-goal/', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' 
+            },
+            body: JSON.stringify({ goal: newGoal })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 更新目标值并隐藏输入框
+                displayElement.innerText = newGoal;
+                inputElement.style.display = 'none';
+                window.location.reload(); 
+            } else {
+                // 处理失败情况（例如，显示错误信息）
+                alert("设置失败，请重试！");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+      }
+     });   
+    </script>
+
+ 
+</body>
+</html>
