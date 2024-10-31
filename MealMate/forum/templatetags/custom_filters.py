@@ -1,23 +1,34 @@
 from django import template
 from django.utils.timesince import timesince
+from django.utils import timezone
 import random
 
 register = template.Library()
 
 @register.filter
 def time_ago(value):
-    time_difference = timesince(value)
-    units = {
-        'days': 'd',
-        'hours': 'h',
-        'minutes': 'min',
-        'seconds': 's'
-    }
-    for long_unit, short_unit in units.items():
-        if long_unit in time_difference:
-            number = time_difference.split()[0]
-            return f"{number}{short_unit} ago"
-    return "just now"
+    now = timezone.now()
+    time_difference = now - value
+
+    seconds = time_difference.total_seconds()
+    minutes = seconds // 60
+    hours = minutes // 60
+    days = hours // 24
+    months = days // 30
+    years = days // 365
+
+    if years >= 1:
+        return f"{int(years)}y ago"
+    elif months >= 1:
+        return f"{int(months)}m ago"
+    elif days >= 1:
+        return f"{int(days)}d ago"
+    elif hours >= 1:
+        return f"{int(hours)}h ago"
+    elif minutes >= 1:
+        return f"{int(minutes)}min ago"
+    else:
+        return "just now"
 
 @register.filter
 def random_avatar(_):
