@@ -8,6 +8,8 @@ import calendar
 import json 
 from django.views.decorators.csrf import csrf_exempt
 from collections import defaultdict
+import logging
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def record_list(request):
@@ -46,7 +48,7 @@ def record_list(request):
              image=image
             )
 
-        return redirect(f"/?date={date_to_use}")
+        return redirect(f"/record/?date={date_to_use}")
     else:
         print("Missing data fields!")
 
@@ -191,11 +193,14 @@ def get_calendar_data(request, year, month):
         else:
             continue
 
+        percentage = (total_intake / daily_calorie_goal) * 100 if daily_calorie_goal > 0 else 0
         calendar_data[date_key] = color
 
     return JsonResponse(calendar_data)
 
+
 def meal_search_ajax(request):
+
     query = request.GET.get('search', '')
     page = int(request.GET.get('page', 1))
     page_size = 5  # 每页显示 5 条记录
@@ -217,7 +222,7 @@ def meal_search_ajax(request):
     data = []
     for meal in meals:
         data.append({
-            'id': meal.id,
+            
             'name': meal.name,
             'image_url': meal.image.url if meal.image else None,
             'comment': meal.comment,
@@ -232,6 +237,3 @@ def meal_search_ajax(request):
         'page': page,
         'page_size': page_size,
     })
-
-
-
