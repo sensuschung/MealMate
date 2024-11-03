@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path,include
 from django.urls import path
 from management.views import home_view
-from forum.views import forum_home_view,forum_post_view,post_detail,post_create_view,create_tag,group_post_view,group_detail,join_group,forum_message_view,pass_request,reject_request,confirm_request,delete_post,delete_group_post,edit_post
+from forum.views import forum_home_view,forum_post_view,post_detail,post_create_view,create_tag,group_post_view,group_detail,join_group,forum_message_view,pass_request,reject_request,confirm_request,delete_post,delete_group_post,edit_post,edit_group_post
 from django.conf import settings
 from django.conf.urls.static import static
 from api.views import PostListView,SearchPostView
@@ -44,4 +44,5 @@ urlpatterns = [
     path('forum/post/delete/<uuid:post_id>/', delete_post, name='delete_post'),
     path('forum/group_post/delete/<uuid:post_id>/', delete_group_post, name='deletegroup__post'),
     path('forum/post/edit/<uuid:post_id>/', edit_post, name='edit_post'),
+    path('forum/group_post/edit/<uuid:post_id>/', edit_group_post, name='edit_group_post'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

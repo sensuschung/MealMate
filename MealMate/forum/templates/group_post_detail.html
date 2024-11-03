@@ -63,7 +63,7 @@
                 </div>
                 {% if current_user == group_post.sponser %}
                 <div class="item" style="align-items:right;">
-                    <a href="" style="color:gray;"><i class="edit large icon"></i></a>
+                    <a style="color:gray;" href="{% url 'edit_group_post' group_post.id %}"><i class="edit large icon"></i></a>
                     <a href="" class="delete-button" style="color:gray;" data-id="{{ group_post.id }}"
                         style="color:gray;"><i class="trash alternate large icon"></i></a>
                 </div>
