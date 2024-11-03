@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentDateElement = document.getElementById('current-date');
     let currentDate = new Date(currentDateElement.innerText);
 
+
+
     // 初始化日期选择器
     flatpickr("#datepicker", {
         dateFormat: "Y-m-d",
@@ -10,19 +12,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedDates.length > 0) {
                 const newDate = new Date(selectedDates[0]);
                 newDate.setDate(newDate.getDate() + 1); // 加一天
-                window.location.href = `/?date=${newDate.toISOString().split('T')[0]}`;
+                window.location.href = `/record/?date=${newDate.toISOString().split('T')[0]}`;
             }
         }
     });
 
     document.getElementById('prev-date').addEventListener('click', function() {
         currentDate.setDate(currentDate.getDate() - 1);
-        window.location.href = `/?date=${currentDate.toISOString().split('T')[0]}`;
+        window.location.href = `/record/?date=${currentDate.toISOString().split('T')[0]}`;
     });
 
     document.getElementById('next-date').addEventListener('click', function() {
         currentDate.setDate(currentDate.getDate() + 1);
-        window.location.href = `/?date=${currentDate.toISOString().split('T')[0]}`;
+        window.location.href = `/record/?date=${currentDate.toISOString().split('T')[0]}`;
     });
 
     // 点击当前日期时，显示日期选择器
@@ -31,49 +33,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const addButtons = document.querySelectorAll('.add-btn');
-    const modal = document.getElementById('add-modal');
-    const modalTitle = document.getElementById('modal-title');
-    const cancelButton = document.querySelector('.cancel-btn');
-    
-
-    addButtons.forEach(button => {
-        button.addEventListener('click', function() { // 使用常规函数而不是箭头函数
-            modal.style.display = 'block'; // 显示弹窗
-            const mealType = this.dataset.mealType; // 获取按钮上的 meal_type
-            document.getElementById('meal-type').value = mealType; // 设置隐藏字段的值
-            modalTitle.textContent = `${mealType} — 添加`; // 设置弹窗标题
-        });
-    });
-
-    cancelButton.addEventListener('click', () => {
-        modal.style.display = 'none'; // 关闭弹窗
-    });
-
-    // 关闭弹窗的逻辑
-    const closeButton = document.querySelector('.close-btn');
-    closeButton.addEventListener('click', () => {
-        modal.style.display = 'none'; // 关闭弹窗
-    });
-});
-
-
-
 document.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', calculateCalories);
 });
-
+document.querySelectorAll('input[name="fruit"]').forEach(input => {
+    input.addEventListener('change', calculateCalories);
+})
 function calculateCalories() {
-    const gender = document.querySelector('input[name="gender"]:checked');
+    const genderInput = document.querySelector('input[name="fruit"]:checked'); // 获取选中的性别
     const age = parseInt(document.getElementById('age').value);
     const height = parseFloat(document.getElementById('height').value);
     const weight = parseFloat(document.getElementById('weight').value);
 
     // 确保所有输入都有效
-    if (gender && age > 0 && age < 100 && height > 0 && weight > 0) {
+    if (genderInput && age > 0 && age < 100 && height > 0 && weight > 0) {
         let bmr;
-        if (gender.value === 'male') {
+        const gender = genderInput.value; // 获取性别的值
+        if (gender === 'male') {
             // 男性BMR公式
             bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
         } else {
@@ -86,8 +62,13 @@ function calculateCalories() {
 
         document.getElementById('maintainCalories').innerText = `${maintainCalories} kcal`;
         document.getElementById('loseCalories').innerText = `${loseCalories} kcal`;
+    } else {
+        // 处理输入无效的情况
+        document.getElementById('maintainCalories').innerText = '-';
+        document.getElementById('loseCalories').innerText = '-';
     }
 }
+
 
 
 
@@ -96,20 +77,24 @@ let totalPages = 1;   // 总页数
 
 function searchMeals() {
     const query = document.getElementById('search-input').value;
+   
+    
 
     // 如果搜索框为空，清空结果并隐藏分页
     if (!query.trim()) {
         document.getElementById('search-results').innerHTML = ''; // 清空结果
         document.getElementById('pagination').style.display = 'none'; // 隐藏分页
+        
         return;
     }
 
-    fetch(`/search/ajax/?search=${encodeURIComponent(query)}&page=${currentPage}`)
+    fetch(`/record/search/ajax/?search=${encodeURIComponent(query)}&page=${currentPage}`)
         .then(response => response.json())
         .then(data => {
+           
             const searchResultsContainer = document.getElementById('search-results');
             searchResultsContainer.innerHTML = ''; // 清空当前内容
-
+           
             const totalCountElement = document.getElementById('total-count');
             totalCountElement.innerHTML = `${data.total_count}个结果`  ;
             
@@ -120,26 +105,50 @@ function searchMeals() {
                 return;
             }
 
-            
-
             data.data.forEach(meal => {
                 const mealItem = document.createElement('div');
-                mealItem.className = 'meal-item';
+                mealItem.className = 'ui brown segment'; // 确保这里是 "segment"
+            
                 mealItem.innerHTML = `
-                    <div class="meal-image">
-                        ${meal.image_url ? `<img src="${meal.image_url}" alt="meal image">` : ''}
-                    </div>
-                    <div class="meal-details">
-                        <p class="meal-name">${meal.name}</p>
-                       <span style="color: gray; font-family: Arial, sans-serif;">${meal.created_at}    ${meal.meal_type_display}</span>
-                        <p class="meal-comment">${meal.comment ? '评论: ' + meal.comment : ''}</p>
-                    </div>
-                    <div class="meal-calories">
-                        <p>${meal.calories} 卡</p>
+                    <div class="ui unstackable divided items">
+                        <div class="item">
+                            ${meal.image_url ? `
+                                <a class="ui tiny image">
+                                    <img style="margin-left:8%; margin-bottom:4%; margin-top:0;" src="${meal.image_url}" alt="meal image">
+                                </a>
+                            ` : ''}
+            
+                            ${meal.comment ? `
+                                <div class="content" style="margin-left:1%; min-width:10em;">
+                                    <div class="header">${meal.name} </div>
+                                    <div class="meta">
+                                     <span>${meal.meal_type_display}</span>
+                                     <span> ${meal.created_at}</span>
+                                    </div>
+                                    <div class="description" style="margin-bottom:2%">
+                                        <p><span class="ui small  text">${meal.comment}</span></p>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="middle aligned content" style="margin-left:1%; min-width:10em;">
+                                    <a class="header">${meal.name}</a>
+                                     <div class="meta">
+                                     <span>${meal.meal_type_display}</span>
+                                     <span> ${meal.created_at}</span>
+                                    </div>
+                                </div>
+                            `}
+            
+                            <div class="extra" style="display: flex; justify-content: flex-end;">
+                                <span class="ui medium red text"><strong>${meal.calories}卡</strong></span>
+                            </div>
+                        </div>
                     </div>
                 `;
+            
                 searchResultsContainer.appendChild(mealItem);
             });
+            
 
             totalPages = Math.ceil(data.total_count / data.page_size); // 计算总页数
             updatePagination(); // 更新分页
@@ -177,6 +186,7 @@ function updatePagination() {
     pageInput.style.display = 'inline';
     goButton.style.display = 'inline';
     pageInput.value = currentPage; // 设置当前页数
+    pageInput.max=totalPages;
 
     // 跳转按钮事件
     goButton.onclick = () => {
