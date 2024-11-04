@@ -249,35 +249,86 @@ $('.ui.search')
 })
 ;
 
-const wordcloud_chart=document.getElementById('wordcloud');
-const chart1 = echarts.init(wordcloud_chart);
+var wordcloud_chart=document.getElementById('wordcloud');
+var chart1 = echarts.init(wordcloud_chart);
+
+const tag_count ={{tag_count|safe}};
+
+const blackcolor = ['#155263', '#6c5b7c', '#c06c84', '#ff6f3c'];
+const redcolor = ['#ff6464', '#ff8264', '#ffaa64','#fff5a5', ];
+    
+const iterate = (arr, i, j, l) => {
+    const fontSizeBase = l === 0 ? 60 : 40;
+    for (let k = i; k <= j; k++) {
+        arr[k].textStyle = {
+            color: k % 2 === 0 ? (l === 0 ? redcolor[l] : redcolor[l]) : blackcolor[l],
+            fontSize: l === 0 ? (k === 0 ? fontSizeBase : fontSizeBase - k) : undefined
+        };
+    }
+};
+
+const tag_count_data = (tag_count) => {
+    const len = tag_count.length;
+    if (len <= 8) {
+        tag_count.forEach((tag, k) => {
+            tag.textStyle = {
+                color: k % 2 === 0 ? redcolor[Math.floor(k / 2)] : blackcolor[Math.floor(k / 2)]
+            };
+        });
+    } else {
+        const mid = Math.floor(len / 2);
+        iterate(tag_count, 0, mid - 1, 0);
+        iterate(tag_count, mid, Math.floor(len / 2 + (len % 2)), 1);
+        iterate(tag_count, Math.floor(len / 2 + (len % 2)), len - 1, 2);
+    }
+    return tag_count; // 返回处理后的 tag_count
+};
+
+console.log(tag_count_data(tag_count));
 
 function updateChart1(){
-    chart1.setOption({
-        series: [{
-            title: {
-                text: '简单柱状图示例'
+    var option = {
+        tooltip: {},
+        series: [ {
+            type: 'wordCloud',
+            gridSize: 6,
+            sizeRange: [10, 30],
+            rotationRange: [-45, 45],
+            shape: 'square',
+            width: "100%",
+            height: "100%",
+            keepAspect: true,
+            drawOutOfBound: false,
+            shrinkToFit: false,
+            layoutAnimation: true,
+            textStyle: {
+                color: function () {
+                    return 'rgb(' + [
+                        Math.round(Math.random() * 160),
+                        Math.round(Math.random() * 160),
+                        Math.round(Math.random() * 160)
+                    ].join(',') + ')';
+                }
             },
-            tooltip: {},
-            legend: {
-                data: ['销量']
+            emphasis: {
+                focus: 'self',
+                textStyle: {
+                    shadowBlur: 10,
+                    shadowColor: '#333',
+                }
+                
             },
-            xAxis: {
-                data: ['苹果', '香蕉', '橘子', '梨', '葡萄']
-            },
-            yAxis: {},
-            series: [{
-                name: '销量',
-                type: 'bar',
-                data: [5, 20, 36, 10, 10]
-            }]
-        }]
-    });
+            data: tag_count_data(tag_count)
+        } ]
+    };
+    chart1.setOption(option);
+    window.onresize = chart.resize;
+
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    updateChart1();
-});
+updateChart1();
+
+window.addEventListener('resize', updateChart1);
 
 </script>
 {% endblock %}
