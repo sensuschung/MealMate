@@ -12,16 +12,19 @@ from markdown import markdown
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Q,Count
 
 def base_view(request):
     user = request.user
-
-    condition1 = JoinRequest.objects.filter(sponser=user, state=0).exists()
-    condition2 = JoinRequest.objects.filter(user=user, state=1).exists()
-    message_reminder_visible = condition1 or condition2
-
-    return message_reminder_visible
+    if request.user.is_authenticated:
+        condition1 = JoinRequest.objects.filter(sponser=user, state=0).exists()
+        condition2 = JoinRequest.objects.filter(user=user, state=1).exists()
+        message_reminder_visible = condition1 or condition2
+        is_authenticated = True
+    else:
+        message_reminder_visible = False
+        is_authenticated = False
+    return message_reminder_visible,is_authenticated
 
 def forum_message_view(request):
     current_user = request.user
@@ -39,19 +42,19 @@ def forum_message_view(request):
     post_unfinished_page_obj = post_unfinished_paginator.get_page(post_unfinished_page_number)
     post_finished_page_obj = post_finished_paginator.get_page(post_finished_page_number)
 
-    message_reminder_visible = base_view(request)
-    return render(request,'post_message.html',{'message_reminder_visible': message_reminder_visible,'current_user':current_user,'unfinished_count':unfinished_count,'post_unfinished_page_obj':post_unfinished_page_obj,'post_finished_page_obj':post_finished_page_obj,'finished_count':finished_count,})
+    message_reminder_visible,is_authenticated = base_view(request)
+    return render(request,'post_message.html',{'message_reminder_visible': message_reminder_visible,'is_authenticated':is_authenticated,'current_user':current_user,'unfinished_count':unfinished_count,'post_unfinished_page_obj':post_unfinished_page_obj,'post_finished_page_obj':post_finished_page_obj,'finished_count':finished_count,})
 
 def forum_home_view(request):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     response = requests.get("https://canteen.sjtu.edu.cn/CARD/Ajax/Place")
     canteen_data = response.json()
     group_posts = GroupPost.objects.order_by('-create_at')[:3]
     posts = Post.objects.order_by('-click')[:5]
-    return render(request,'forum.html', {'active_link': 'forum_home','canteen_data': canteen_data,'group_posts': group_posts,'posts':posts,'message_reminder_visible': message_reminder_visible,})
+    return render(request,'forum.html', {'is_authenticated':is_authenticated,'active_link': 'forum_home','canteen_data': canteen_data,'group_posts': group_posts,'posts':posts,'message_reminder_visible': message_reminder_visible,})
 
 def forum_post_view(request, forum_id):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     forums = Forum.objects.all()
     forum_target = get_object_or_404(Forum, id=forum_id)
     posts = Post.objects.filter(forum=forum_target).order_by('-last_modified')
@@ -60,10 +63,13 @@ def forum_post_view(request, forum_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request,'forum_post.html',{'active_link': 'forum_home','forums':forums,'posts':page_obj,'selected_forum_id': forum_target.id,'forum_target':forum_target,'message_reminder_visible': message_reminder_visible,})
+    tag_counts = Tag.objects.annotate(post_count=Count('post')).values('name', 'post_count')
+    tag_count = [{'name': tag['name'], 'value': tag['post_count']} for tag in tag_counts]
+
+    return render(request,'forum_post.html',{'is_authenticated':is_authenticated,'tag_count':tag_count,'active_link': 'forum_home','forums':forums,'posts':page_obj,'selected_forum_id': forum_target.id,'forum_target':forum_target,'message_reminder_visible': message_reminder_visible,})
 
 def group_post_view(request):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     forums = Forum.objects.all()
     group_posts = GroupPost.objects.order_by('-create_at')
 
@@ -71,27 +77,30 @@ def group_post_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request,'group_post_list.html',{'active_link': 'forum_home','forums':forums,'group_posts':page_obj,'message_reminder_visible': message_reminder_visible,})
+    tag_counts = Tag.objects.annotate(post_count=Count('post')).values('name', 'post_count')
+    tag_count = [{'name': tag['name'], 'value': tag['post_count']} for tag in tag_counts]
+
+    return render(request,'group_post_list.html',{'is_authenticated':is_authenticated,'tag_count':tag_count,'active_link': 'forum_home','forums':forums,'group_posts':page_obj,'message_reminder_visible': message_reminder_visible,})
 
 
 def post_detail(request, uuid):
     current_user = request.user
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     forums = Forum.objects.all()
     post = get_object_or_404(Post, id=uuid)
     post.click += 1
     content = markdown(post.content)
     post.save(update_fields=['click'])
-    return render(request, 'post_detail.html', {'active_link': 'forum_home','forums':forums,'post': post,'message_reminder_visible': message_reminder_visible,'current_user':current_user,'content':content,})
+    return render(request, 'post_detail.html', {'is_authenticated':is_authenticated,'active_link': 'forum_home','forums':forums,'post': post,'message_reminder_visible': message_reminder_visible,'current_user':current_user,'content':content,})
 
 def group_detail(request, uuid):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     current_user = request.user
     forums = Forum.objects.all()
     current_time = timezone.now()
     group_post = get_object_or_404(GroupPost, id=uuid)
     content = markdown(group_post.content)
-    return render(request, 'group_post_detail.html', {'active_link': 'forum_home','forums':forums,'group_post': group_post,'current_time':current_time,'current_user':current_user,'message_reminder_visible': message_reminder_visible,'content':content,})
+    return render(request, 'group_post_detail.html', {'is_authenticated':is_authenticated,'active_link': 'forum_home','forums':forums,'group_post': group_post,'current_time':current_time,'current_user':current_user,'message_reminder_visible': message_reminder_visible,'content':content,})
 
 @csrf_exempt
 def create_tag(request):
@@ -107,7 +116,7 @@ def create_tag(request):
 
 @login_required 
 def post_create_view(request):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     current_user = request.user
     if current_user.is_authenticated:
         username = current_user.username
@@ -182,7 +191,8 @@ def post_create_view(request):
                     'forum_id': forum_id,
                     'content': content,
                     'selected_tags': tags,
-                    'error_message': str(e)
+                    'error_message': str(e),
+                    'is_authenticated':is_authenticated,
                 }
             else:
                 context = {
@@ -195,11 +205,12 @@ def post_create_view(request):
                     'max':max_participants,
                     'min':min_participants,
                     'content': content,
-                    'error_message': str(e)
+                    'error_message': str(e),
+                    'is_authenticated':is_authenticated,
                 }
             return render(request, 'post_add.html', context)
     
-    return render(request,'post_add.html', {'active_link': 'forum_home','forums':forums,'username': username,'tags':tags,'message_reminder_visible': message_reminder_visible,})
+    return render(request,'post_add.html', {'is_authenticated':is_authenticated,'active_link': 'forum_home','forums':forums,'username': username,'tags':tags,'message_reminder_visible': message_reminder_visible,})
 
 def join_group(request, group_post_id):
     if request.method == 'POST':
@@ -268,7 +279,7 @@ def delete_group_post(request, post_id):
         return JsonResponse({'error': 'Post not found.'}, status=404)
 
 def edit_post(request, post_id):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     current_user = request.user
     forums = Forum.objects.all()
     tags = Tag.objects.all()
@@ -321,13 +332,14 @@ def edit_post(request, post_id):
                 'tag_names': tags_string,
                 'error_message': str(e),
                 'post_id':post_id,
+                'is_authenticated':is_authenticated,
             }
             return render(request, 'post_edit.html', context)
     
-    return render(request,'post_edit.html',{'active_link': 'forum_home','forums':forums,'tags':tags,'message_reminder_visible': message_reminder_visible,'username': current_user,'title':title,'forum_id':forum_id,'content':content,'tag_names':tag_names,'author':author,'post_id':post_id,})
+    return render(request,'post_edit.html',{'is_authenticated':is_authenticated,'active_link': 'forum_home','forums':forums,'tags':tags,'message_reminder_visible': message_reminder_visible,'username': current_user,'title':title,'forum_id':forum_id,'content':content,'tag_names':tag_names,'author':author,'post_id':post_id,})
 
 def edit_group_post(request, post_id):
-    message_reminder_visible = base_view(request)
+    message_reminder_visible,is_authenticated = base_view(request)
     current_user = request.user
     group_post = GroupPost.objects.get(id=post_id)
     title = group_post.title
@@ -380,8 +392,9 @@ def edit_group_post(request, post_id):
                 'max':max_participants,
                 'min':min_participants,
                 'content': content,
-                'error_message': str(e)
+                'error_message': str(e),
+                'is_authenticated':is_authenticated,
             }
             return render(request, 'group_post_edit.html', context)
     
-    return render(request,'group_post_edit.html', {'username': request.user.username,'active_link': 'forum_home','message_reminder_visible': message_reminder_visible,'title': title,'address': address,'target_time':target_time_str,'max':max_participants,'min':min_participants,'content': content,})
+    return render(request,'group_post_edit.html', {'username': request.user.username,'active_link': 'forum_home','message_reminder_visible': message_reminder_visible,'title': title,'address': address,'target_time':target_time_str,'max':max_participants,'min':min_participants,'content': content,'is_authenticated':is_authenticated,})

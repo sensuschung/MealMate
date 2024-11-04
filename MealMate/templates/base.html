@@ -329,9 +329,9 @@
                               <button class="ui button">Submit</button>
                             </div>
                           </div> -->
-                        <div class="item" >
+                        <div class="ui item " >
                             <a class="ui right corner small red empty circular label {% if message_reminder_visible %}visible{% else %}hidden{% endif %}" id="messege_reminder"></a>
-                            <a href="{% url 'message_forum' %}" class="content">
+                            <a href="{% if is_authenticated %}{% url 'message_forum' %}{% else %}{% endif %}" class="content {% if is_authenticated %}{% else %}login-toast{% endif %}">
                                 <i class="bell icon brown"></i>
                             </a>
                         </div>
@@ -401,7 +401,25 @@
         </div>
     </div>
 
+    <script>
+        $(document).ready(function() {
+            $('.login-toast').on('click', function(event) {
+                    event.preventDefault(); 
 
+                    const $toast = $('<div class="ui toast">Please login first!</div>');
+                    
+                    $('body').append($toast);
+
+                    $toast.transition('fade in');
+
+                    setTimeout(function() {
+                        $toast.transition('fade out', function() {
+                            $toast.remove(); 
+                        });
+                    }, 3000);
+                });
+        });
+    </script>
     {% block script %}{% endblock %}
 </body>
 
