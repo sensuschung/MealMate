@@ -405,18 +405,16 @@
         $(document).ready(function() {
             $('.login-toast').on('click', function(event) {
                     event.preventDefault(); 
-
-                    const $toast = $('<div class="ui toast">Please login first!</div>');
-                    
-                    $('body').append($toast);
-
-                    $toast.transition('fade in');
-
-                    setTimeout(function() {
-                        $toast.transition('fade out', function() {
-                            $toast.remove(); 
-                        });
-                    }, 3000);
+                    $.toast({
+                        title: 'Warning',
+                        position: 'top center',
+                        message: 'Please login first',
+                        class:'yellow',
+                        className: {
+                            toast: 'ui message'
+                        }
+                    })
+                    ;
                 });
         });
     </script>
