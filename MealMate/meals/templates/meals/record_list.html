@@ -21,13 +21,13 @@
                                 {% if remaining_calories >= 0 %}
                                 <span class="ui grey text"><strong>还可以吃</strong></span>
                                 <div class="ui basic segment">
-                                <span class="ui big text"><strong>{{ remaining_calories }} </strong></span>
+                                 <span class="ui big text"><strong>{{ remaining_calories }} </strong></span>
                                 </div>
                                 {% else %}
                                 <span class="ui grey text"><strong>已经超过</strong></span>
                                 <div class="ui basic segment">
                                     <span class="ui big red text"><strong>{{ remainingcalories }} </strong></span>
-                                    </div>
+                                </div>
                                 {% endif %}
                            
                                 <span class="ui grey text"><strong>卡</strong></span>
@@ -85,13 +85,13 @@
                            <label>Lose ~0.5 kg p er week:</label>
                            <strong><span id="loseCalories"class="ui large  text">-</span> </strong>   
                         </div> 
-                    </div>  
+                 </div>
                 </div>     
             </div>
                        
             <div class="eight wide column">
                 <div class="ui one column grid">
-                <div class="ui content" style="width:100% ;">
+                 <div class="ui content" style="width:100% ;">
                     <div class="ui basic segment" style="display:flex;justify-content:space-around;">
                         <button id="prev-date" class="medium ui icon brown button" ><i class="angle left icon"></i></button>
                         <span id="current-date" class="ui big text"><strong>{{ current_date }}</strong></span>
@@ -116,13 +116,13 @@
                     {% for meal_type, display_name in meal_types_display %}
                         <div class="ui fluid card" id="meal-card">
                             <div class = "ui content">
-                            <div class="ui header">
+                             <div class="ui header">
                                 {{ display_name }}
                                 <div class="right floated">
                                     <button  id="open-modal" class="ui icon orange button" data-meal-type="{{ meal_type }}"><i class="plus icon"></i></button>
                                     <button  id="delete-all" class="ui icon yellow button" ><i class="minus icon"></i></button>
                                 </div>
-                            </div>
+                             </div>
                             </div>
                             <div class="ui unstackable divided items" >
                                 {% with categorized_meals|get_item:meal_type as meals %}
@@ -144,20 +144,20 @@
                                                          {% else %}
                                                          <div class="middle aligned content" style="margin-left:1%;min-width:10em;">
                                                             <a  class="header">{{ meal.name }}</a>
-                                                          </div>
+                                                        </div>
                                                           {% endif%}
-                                                <div class="extra" style="display: flex;justify-content: flex-end;">
-                                                    <span class="ui medium red text"><strong>{{ meal.calories }}卡</strong></span>
-                                                    <button id="delete-btn" data-meal-id="{{ meal.id }}" style="display: none;height:2em;"class="small ui icon  yellow button" ><i class="minus icon"></i></button>
+                                                    <div class="extra" style="display: flex;justify-content: flex-end;">
+                                                     <span class="ui medium red text"><strong>{{ meal.calories }}卡</strong></span>
+                                                     <button id="delete-btn" data-meal-id="{{ meal.id }}" style="display: none;height:2em;"class="small ui icon  yellow button" ><i class="minus icon"></i></button>
+                                                    </div>
                                                 </div>
-                                            </div>
                                         {% endfor %}
                                     {% endif %}
                                 {% endwith %}
                             </div>
                         </div>
                     {% endfor %}                  
-                </div>
+                 </div>
                 </div>
             </div>
             
@@ -195,8 +195,10 @@
                         {% endfor %}
                     </div>    
                 </div>
-            </div>
-        </div>           
+            </div>  
+
+        </div>
+    </div>       
     
         <!-- 添加记录的弹窗 -->
        
@@ -225,13 +227,14 @@
                         <input type="file" id="image" name="image" accept="image/*">
                      </div>
                     </div>
+                </form>
             </div>
             <div class="actions">
                 <button id="meal-ad" type="submit" class="ui right yellow labeled icon button">添加<i class="checkmark icon"></i></button>
                 <button id="model-cancel"type="button"  class="ui black right deny button">取消</button>
             </div>  
         </div>
-    </form>
+    
     
         
         
