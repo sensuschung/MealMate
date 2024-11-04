@@ -143,6 +143,7 @@ def record_list(request):
         'days_in_month': days_in_month, 
         'favorite_meals': favorite_meals,
         'remainingcalories': remainingcalories,
+        'active_link': 'record_list',
     })
 
 def delete_meal(request, meal_id):

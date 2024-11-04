@@ -37,6 +37,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/progress.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'sementic/dist/components/popup.min.css' %}">
 
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fonts.css' %}">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
@@ -187,6 +189,7 @@
         }
     </style>
     <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+    <script src="{% static 'js/echarts-wordcloud/echarts-wordcloud.min.js' %}"></script>
     <script src="{% static 'js/easymde/easymde.js' %}"></script>
     <script src="{% static 'sementic/dist/semantic.js' %}"></script>
     <script src="{% static 'lightbox/js/lightbox.min.js' %}"></script>
@@ -245,31 +248,46 @@
 
 <body>
     <!-- Following Menu -->
-    <div class="ui large top fixed hidden inverted brown menu">
+    <div class="ui large top fixed hidden menu" style="background-color:#ffde7d ;">
         <div class="ui container">
-            <div class="header item">Brand</div>
-            <a class="item" href="{% url 'home' %}">Home</a>
-            <a class="item" href="{% url 'forum_home' %}">Forum</a>
-            <a class="item">Company</a>
-            <a class="item">Careers</a>
+            <div class="item" style="font-family: 'PermanentMarker', cursive;font-size:26px;padding: 0.5em;">
+                <img class="ui image" src="{% static 'img/icon/baozi.png' %}" alt="icon" style="margin-right: 12px;height: 33px;" />
+                Mealmate
+            </div>
+            <a class="item {% if active_link == 'home' %}active{% endif %}" href="{% url 'home' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Home</a>
+            <a class="item {% if active_link == 'forum_home' %}active{% endif %}" href="{% url 'forum_home' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Forum</a>
+            <a class="item {% if active_link == 'record_list' %}active{% endif %}" href="{% url 'record_list' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Record</a>
+            <a class="item {% if active_link == '111' %}active{% endif %}" href="#" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Careers</a>
             <div class="right menu">
                 <div class="item">
-                    <a class="ui inverted button">Log in</a>
+                    <a class="ui basic button">Log in</a>
                 </div>
                 <div class="item">
-                    <a class="ui inverted button">Sign Up</a>
+                    <a class="ui basic button">Sign Up</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Sidebar Menu -->
-    <div class="ui vertical inverted brown sidebar menu">
-        <div class="header item">Brand</div>
-        <a class="item" href="{% url 'home' %}">Home</a>
-        <a class="item" href="{% url 'forum_home' %}">Forum</a>
-        <a class="item">Company</a>
-        <a class="item">Careers</a>
+    <div class="ui vertical sidebar menu" style="background-color:#d0af4c ;">
+        <div class="item" style="font-family: 'PermanentMarker', cursive;font-size:26px;padding: 0.5em;">
+            <img class="ui avatar image" src="{% static 'img/icon/baozi.png' %}" alt="icon" style="margin-right: 12px;" />
+            Mealmate
+        </div>
+        <a class="item {% if active_link == 'home' %}active{% endif %}" href="{% url 'home' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Home</a>
+        <a class="item {% if active_link == 'forum_home' %}active{% endif %}" href="{% url 'forum_home' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Forum</a>
+        <div class="ui dropdown item" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">
+            Forum
+            <i class="dropdown icon"></i>
+            <div class="menu">
+                <a class="item" href="{% url 'forum_home' %}">Summary</a>
+                <a class="item" href="{% url 'forum_post' 1 %}">Post</a>
+                <a class="item" href="{% url 'group_post_list' %}">Group Post</a>
+            </div>
+        </div>
+        <a class="item {% if active_link == 'record_list' %}active{% endif %}" href="{% url 'record_list' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Record</a>
+        <a class="item {% if active_link == '111' %}active{% endif %}" href="#" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Careers</a>
         <a class="item">Login</a>
         <a class="item">Signup</a>
     </div>
@@ -277,19 +295,31 @@
 
     <!-- Page Contents -->
     <div class="pusher">
-        <div class="ui inverted brown vertical masthead center aligned segment">
+        <div class="ui vertical masthead center aligned yellow segment" style="color:#ffde7d ;">
 
             <div class="ui container">
-                <div class="ui large secondary inverted pointing menu">
-                    <div class="left item">
+                <div class="ui large secondary pointing yellow menu" style="color:#ffde7d ;">
+                    <div class="left item" style="align-items:center ;text-align: center;align-content: center;align-self: center;">
                         <a class="toc item">
                             <i class="sidebar icon"></i>
                         </a>
-                        <div class="header item">Brand</div>
-                        <a class="item" href="{% url 'home' %}">Home</a>
-                        <a class="item" href="{% url 'forum_home' %}">Forum</a>
-                        <a class="item" href="#">Company</a>
-                        <a class="item" href="#">Careers</a>
+                        <div class="item" style="font-family: 'PermanentMarker', cursive;font-size:26px;padding: 0.5em;">
+                            <img class="ui image" src="{% static 'img/icon/baozi.png' %}" alt="icon" style="margin-right: 12px;height: 30px;" />
+                            Mealmate
+                        </div>
+                        <a class="item {% if active_link == 'home' %}active{% endif %}" href="{% url 'home' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Home</a>
+                        <!-- <a class="item {% if active_link == 'forum_home' %}active{% endif %}" href="{% url 'forum_home' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Forum</a> -->
+                        <div class="ui dropdown item" style="padding: 0.6em;padding-bottom:0.65em;font-family: 'Itim', cursive;font-size:20px;{% if active_link == 'forum_home' %}color:#ffb61e;{% endif %}">
+                            Forum
+                            <i class="dropdown icon"></i>
+                            <div class="menu">
+                                <a class="item" href="{% url 'forum_home' %}">Summary</a>
+                                <a class="item" href="{% url 'forum_post' 1 %}">Post</a>
+                                <a class="item" href="{% url 'group_post_list' %}">Group Post</a>
+                            </div>
+                        </div>
+                        <a class="item {% if active_link == 'record_list' %}active{% endif %}" href="{% url 'record_list' %}" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Record</a>
+                        <a class="item {% if active_link == '111' %}active{% endif %}" href="#" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Careers</a>
                     </div>
                     <div class="right item">
                         <!-- <div class="item">
@@ -302,11 +332,11 @@
                         <div class="item" >
                             <a class="ui right corner small red empty circular label {% if message_reminder_visible %}visible{% else %}hidden{% endif %}" id="messege_reminder"></a>
                             <a href="{% url 'message_forum' %}" class="content">
-                                <i class="bell icon inverted"></i>
+                                <i class="bell icon brown"></i>
                             </a>
                         </div>
-                        <a class="ui inverted button">Log in</a>
-                        <a class="ui inverted button">Sign Up</a>
+                        <a class="ui brown button" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Log in</a>
+                        <a class="ui brown button" style="padding: 0.5em;font-family: 'Itim', cursive;font-size:20px;">Sign Up</a>
                     </div>
                 </div>
             </div>
@@ -324,12 +354,12 @@
 
         {% block content %}{% endblock %}
 
-        <div class="ui inverted brown vertical footer segment">
+        <div class="ui vertical footer segment" style="border-top: 5px;background-color:#ffde7d">
             <div class="ui center aligned container">
-                <div class="ui stackable inverted divided grid">
+                <div class="ui stackable divided grid">
                   <div class="three wide column">
-                    <h4 class="ui inverted header">Group 1</h4>
-                    <div class="ui inverted link list">
+                    <h4 class="ui header">Group 1</h4>
+                    <div class="ui link list">
                       <a href="#" class="item">Link One</a>
                       <a href="#" class="item">Link Two</a>
                       <a href="#" class="item">Link Three</a>
@@ -337,8 +367,8 @@
                     </div>
                   </div>
                   <div class="three wide column">
-                    <h4 class="ui inverted header">Group 2</h4>
-                    <div class="ui inverted link list">
+                    <h4 class="ui header">Group 2</h4>
+                    <div class="ui link list">
                       <a href="#" class="item">Link One</a>
                       <a href="#" class="item">Link Two</a>
                       <a href="#" class="item">Link Three</a>
@@ -346,8 +376,8 @@
                     </div>
                   </div>
                   <div class="three wide column">
-                    <h4 class="ui inverted header">Group 3</h4>
-                    <div class="ui inverted link list">
+                    <h4 class="ui header">Group 3</h4>
+                    <div class="ui link list">
                       <a href="#" class="item">Link One</a>
                       <a href="#" class="item">Link Two</a>
                       <a href="#" class="item">Link Three</a>
@@ -355,13 +385,13 @@
                     </div>
                   </div>
                   <div class="seven wide column">
-                    <h4 class="ui inverted header">Footer Header</h4>
+                    <h4 class="ui header">Footer Header</h4>
                     <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
                   </div>
                 </div>
-                <div class="ui inverted section divider"></div>
+                <div class="ui section divider" style="color:#ffde7d;"></div>
                 <img src="{% static 'img/avatar/cat1.png' %}" class="ui centered mini image">
-                <div class="ui horizontal inverted small divided link list">
+                <div class="ui horizontal small divided link list">
                   <a class="item" href="#">Site Map</a>
                   <a class="item" href="#">Contact Us</a>
                   <a class="item" href="#">Terms and Conditions</a>
@@ -371,7 +401,7 @@
         </div>
     </div>
 
-    
+
     {% block script %}{% endblock %}
 </body>
 

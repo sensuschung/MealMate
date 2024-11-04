@@ -48,7 +48,7 @@ def forum_home_view(request):
     canteen_data = response.json()
     group_posts = GroupPost.objects.order_by('-create_at')[:3]
     posts = Post.objects.order_by('-click')[:5]
-    return render(request,'forum.html', {'canteen_data': canteen_data,'group_posts': group_posts,'posts':posts,'message_reminder_visible': message_reminder_visible,})
+    return render(request,'forum.html', {'active_link': 'forum_home','canteen_data': canteen_data,'group_posts': group_posts,'posts':posts,'message_reminder_visible': message_reminder_visible,})
 
 def forum_post_view(request, forum_id):
     message_reminder_visible = base_view(request)
@@ -60,7 +60,7 @@ def forum_post_view(request, forum_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request,'forum_post.html',{'forums':forums,'posts':page_obj,'selected_forum_id': forum_target.id,'forum_target':forum_target,'message_reminder_visible': message_reminder_visible,})
+    return render(request,'forum_post.html',{'active_link': 'forum_home','forums':forums,'posts':page_obj,'selected_forum_id': forum_target.id,'forum_target':forum_target,'message_reminder_visible': message_reminder_visible,})
 
 def group_post_view(request):
     message_reminder_visible = base_view(request)
@@ -71,7 +71,7 @@ def group_post_view(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request,'group_post_list.html',{'forums':forums,'group_posts':page_obj,'message_reminder_visible': message_reminder_visible,})
+    return render(request,'group_post_list.html',{'active_link': 'forum_home','forums':forums,'group_posts':page_obj,'message_reminder_visible': message_reminder_visible,})
 
 
 def post_detail(request, uuid):
@@ -82,7 +82,7 @@ def post_detail(request, uuid):
     post.click += 1
     content = markdown(post.content)
     post.save(update_fields=['click'])
-    return render(request, 'post_detail.html', {'forums':forums,'post': post,'message_reminder_visible': message_reminder_visible,'current_user':current_user,'content':content,})
+    return render(request, 'post_detail.html', {'active_link': 'forum_home','forums':forums,'post': post,'message_reminder_visible': message_reminder_visible,'current_user':current_user,'content':content,})
 
 def group_detail(request, uuid):
     message_reminder_visible = base_view(request)
@@ -91,7 +91,7 @@ def group_detail(request, uuid):
     current_time = timezone.now()
     group_post = get_object_or_404(GroupPost, id=uuid)
     content = markdown(group_post.content)
-    return render(request, 'group_post_detail.html', {'forums':forums,'group_post': group_post,'current_time':current_time,'current_user':current_user,'message_reminder_visible': message_reminder_visible,'content':content,})
+    return render(request, 'group_post_detail.html', {'active_link': 'forum_home','forums':forums,'group_post': group_post,'current_time':current_time,'current_user':current_user,'message_reminder_visible': message_reminder_visible,'content':content,})
 
 @csrf_exempt
 def create_tag(request):
@@ -199,7 +199,7 @@ def post_create_view(request):
                 }
             return render(request, 'post_add.html', context)
     
-    return render(request,'post_add.html', {'forums':forums,'username': username,'tags':tags,'message_reminder_visible': message_reminder_visible,})
+    return render(request,'post_add.html', {'active_link': 'forum_home','forums':forums,'username': username,'tags':tags,'message_reminder_visible': message_reminder_visible,})
 
 def join_group(request, group_post_id):
     if request.method == 'POST':
@@ -324,4 +324,64 @@ def edit_post(request, post_id):
             }
             return render(request, 'post_edit.html', context)
     
-    return render(request,'post_edit.html',{'forums':forums,'tags':tags,'message_reminder_visible': message_reminder_visible,'username': current_user,'title':title,'forum_id':forum_id,'content':content,'tag_names':tag_names,'author':author,'post_id':post_id,})
+    return render(request,'post_edit.html',{'active_link': 'forum_home','forums':forums,'tags':tags,'message_reminder_visible': message_reminder_visible,'username': current_user,'title':title,'forum_id':forum_id,'content':content,'tag_names':tag_names,'author':author,'post_id':post_id,})
+
+def edit_group_post(request, post_id):
+    message_reminder_visible = base_view(request)
+    current_user = request.user
+    group_post = GroupPost.objects.get(id=post_id)
+    title = group_post.title
+    content = group_post.content
+    sponser = group_post.sponser
+    max_participants = group_post.max_participants
+    min_participants = group_post.min_participants
+    address = group_post.address
+    target_time = group_post.target_time
+    target_time_str = target_time.strftime('%B %d, %Y %I:%M %p')
+
+    if current_user.is_authenticated:
+        username = current_user.username
+    else:
+        username = "Guest"
+
+    if request.method == 'POST':
+        try:
+            title = request.POST.get('title1')
+            content = request.POST.get('content1')
+            sponser = request.user
+            address = request.POST.get('address')
+            target_time_str = request.POST.get('target_time')
+            max_participants = request.POST.get('max')
+            min_participants = request.POST.get('min')
+            target_time = datetime.strptime(target_time_str, '%B %d, %Y %I:%M %p')
+            target_time = timezone.make_aware(target_time)
+
+            group_post = GroupPost.objects.create(
+                title = title,
+                sponser = sponser,
+                content = content,
+                address = address,
+                target_time = target_time,
+                max_participants = max_participants,
+                min_participants = min_participants
+            )
+
+            group_post.participants.add(sponser)
+            messages.success(request, 'GroupPost edited successfully!')
+
+            return JsonResponse({'status': 'success', 'message': 'GroupPost edited successfully!'})
+        
+        except Exception as e:
+            context = {
+                'username': request.user.username,
+                'title': title,
+                'address': address,
+                'target_time':target_time_str,
+                'max':max_participants,
+                'min':min_participants,
+                'content': content,
+                'error_message': str(e)
+            }
+            return render(request, 'group_post_edit.html', context)
+    
+    return render(request,'group_post_edit.html', {'username': request.user.username,'active_link': 'forum_home','message_reminder_visible': message_reminder_visible,'title': title,'address': address,'target_time':target_time_str,'max':max_participants,'min':min_participants,'content': content,})

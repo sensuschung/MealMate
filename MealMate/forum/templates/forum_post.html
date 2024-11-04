@@ -130,7 +130,8 @@
                 </button>
                 </div>
             </div>
-            <div class="ui calendar" id="inline_calendar">
+            <div class="ui segment" style="height: 300px;width: 100%">
+                <div id="wordcloud" style="height: 100%;width: 100%;"></div>
             </div>
         </div>
     </div>
@@ -139,7 +140,7 @@
 
 {% block script %}
 <script>
-    $('.message .close')
+$('.message .close')
   .on('click', function() {
     $(this)
       .closest('.message')
@@ -247,5 +248,36 @@ $('.ui.search')
 ;
 })
 ;
+
+const wordcloud_chart=document.getElementById('wordcloud');
+const chart1 = echarts.init(wordcloud_chart);
+
+function updateChart1(){
+    chart1.setOption({
+        series: [{
+            title: {
+                text: '简单柱状图示例'
+            },
+            tooltip: {},
+            legend: {
+                data: ['销量']
+            },
+            xAxis: {
+                data: ['苹果', '香蕉', '橘子', '梨', '葡萄']
+            },
+            yAxis: {},
+            series: [{
+                name: '销量',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10]
+            }]
+        }]
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    updateChart1();
+});
+
 </script>
 {% endblock %}
